@@ -27,6 +27,13 @@ dependencies {
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
+	// Mod Menu: la integración es OPCIONAL (entrypoint solo se resuelve si el
+	// usuario tiene Mod Menu instalado). Igual que en el repo padre.
+	modClientImplementation("com.terraformersmc:modmenu:${project.modmenu_version}") {
+		exclude(group: "net.fabricmc.fabric-api")
+		exclude(group: "net.fabricmc", module: "fabric-loader")
+	}
+
 	testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
 }
 

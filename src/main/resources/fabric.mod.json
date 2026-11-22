@@ -1,27 +1,30 @@
 {
-	"schemaVersion": 1,
-	"id": "effecttimer",
-	"version": "${version}",
-	"name": "Effect Timer",
-	"description": "Standalone, ultra-lightweight potion/status-effect timer HUD extracted from Hud Utils: position, scale, orientation, icons, custom text color, blink-on-expire and a live preview (test) mode inside the native config screen.",
-	"authors": [
-		"Denvdrite"
-	],
-	"contact": {
-		"sources": "https://github.com/BlackBoneDel/EFFECT-HUD-"
-	},
-	"license": "MIT",
-	"icon": "assets/effecttimer/icon.png",
-	"environment": "client",
-	"entrypoints": {
-		"client": [
-			"dev.effecttimer.client.EffectTimerMod"
-		]
-	},
-	"depends": {
-		"fabricloader": ">=0.20.1",
-		"minecraft": "~1.21.11",
-		"java": ">=21",
-		"fabric-api": "*"
-	}
+  "schemaVersion": 1,
+  "id": "effecttimer",
+  "version": "${version}",
+  "name": "Effect Timer",
+  "description": "100% port del módulo Effects HUD de Hud Utils como mod standalone ultraligero: HUD de temporizadores de pócimas/efectos con estilos (vanilla compacto, tarjeta, texto minimal, PotionHUD normal/mini), anclajes con editor visual, colores por efecto, presets, reglas de visibilidad, idioma propio EN/ES, vista previa en vivo y Modo de Prueba.",
+  "authors": [
+    "Denvdrite"
+  ],
+  "contact": {
+    "sources": "https://github.com/BlackBoneDel/EFFECT-HUD-"
+  },
+  "license": "MIT",
+  "icon": "assets/effecttimer/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.effecttimer.client.EffectTimerMod"
+    ],
+    "modmenu": [
+      "dev.effecttimer.client.compat.ModMenuIntegration"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.20.1",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
 }

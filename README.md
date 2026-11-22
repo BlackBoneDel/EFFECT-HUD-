@@ -1,11 +1,11 @@
-# Effect Timer — Standalone Potion/Status Effects HUD
+# Effect Timer — Effects HUD 100 % standalone (Fabric)
 
-Extracción quirúrgica del módulo **"Effect Timer" (Effects HUD)** de
-[Hud Utils (HUD-MODS)](https://github.com/BlackBoneDel/HUD-MODS) convertida en un
-mod **independiente y ultra ligero** para Fabric. Sin rastro alguno de los demás
-módulos del proyecto padre: no existe una sola referencia a Armor Status, FPS,
-CPS, Keystrokes, Coordenadas, Ping, Compass, editor visual, presets o estilos
-PotionHUD.
+Port **completo del módulo "Effects HUD"** de [Hud Utils (HUD-MODS)](https://github.com/BlackBoneDel/HUD-MODS)
+a un mod **independiente**: la lógica del repo padre se portó tal cual (clases de
+config, formato, orden, colores, layout y pantallas) y se extirpó todo rastro de
+los demás módulos (no queda una sola referencia a Armor/Durabilidad). La spec de
+v1.0.0 (10 parámetros) queda **derogada**: esta versión expone la superficie
+completa del módulo original.
 
 ## Versiones (idénticas a las del repositorio fuente)
 
@@ -18,105 +18,67 @@ PotionHUD.
 | Loom              | `1.17.21` (plugin `net.fabricmc.fabric-loom-remap`) |
 | Gradle            | `9.8.2` (wrapper incluido) |
 
-## Estructura del proyecto
+## Controles
 
-```
-src/client/java/dev/effecttimer/client/
-├── EffectTimerMod.java              # ClientModInitializer: config, keybind (O), hook HUD
-├── config/
-│   ├── EffectTimerConfig.java       # JSON/GSON con SOLO los 10 parámetros del Effect Timer
-│   ├── Orientation.java             # VERTICAL | HORIZONTAL
-│   └── ColorHex.java                # Validación #RRGGBB + paleta (reducción de ColorHexUtils)
-├── format/
-│   ├── DurationFormatter.java       # mm:ss con relleno y "∞" (heredado del original)
-│   └── LevelNames.java              # Números romanos, nivel I oculto (RomanNumerals + hideLevelOne)
-├── hud/
-│   └── EffectTimerHudRenderer.java  # Dibujo del HUD (EffectsHudRenderer + LiveDataCollector aislados)
-└── screen/
-    └── EffectTimerConfigScreen.java # GUI nativa + MODO DE PRUEBA en vivo
-src/main/resources/
-├── fabric.mod.json
-└── assets/effecttimer/ (icon.png, lang/en_us.json, lang/es_es.json)
-src/test/java/dev/effecttimer/       # Tests de formato, colores y persistencia
-```
+- Tecla **O** → pantalla principal (toggle del HUD, *Configure Effects…*, idioma,
+  preajustes, reglas de visibilidad, guías del editor, reset y guardar).
+- Tecla **H** → **editor visual**: arrastra el HUD para moverlo (el anclaje pasa a
+  `CUSTOM` automáticamente), arrastra una esquina para escalar (0.50–2.50),
+  imán a rejilla + guías de centrado; `Escape`/Cancelar restaura lo que había al entrar.
+- **Tercera ligación sin asignar** → toggle on/off que guarda al instante y avisa
+  en la action bar.
+- Las tres teclas viven en su propia categoría **"Effect Timer"** del juego.
+- Integración opcional con **Mod Menu** (abre la misma pantalla principal).
 
-## Configuración (`config/effecttimer.json`)
+## Funcionalidad portada del módulo original
 
-Única superficie de guardado/lectura, según la spec:
+- **Estilos**: `MINECRAFT_COMPACT`, `CLEAN_CARD`, `MINIMAL_TEXT` y `POTION_HUD`
+  (con submodo `NORMAL`/`MINI` y mini-indicador `TIMER_TEXT`/`DURATION_BAR`).
+- **Apariencia**: fondo activable con opacidad 0–100 % (def. 65 %), borde
+  independiente, `rowSpacing` 0–16, escala con cuantización 1/100.
+- **Elementos**: icono, nombre, duración, nivel (romano/árabe, `hideLevelOne`).
+- **Tiempo**: prefijo `~` cuando el reloj del mundo está congelado, barra/duración
+  relativa al **máximo observado** por efecto (purge al desaparecer), fade del
+  icono cerca del final (umbral 200 ticks ≈ 10 s), `colorDurationByRemaining`
+  (rojo ≤10 s, amarillo ≤30 s, cian ∞; el color personalizado por efecto gana).
+- **Filtros/orden**: ocultar efectos sin partículas, agrupar por categoría,
+  orden por nombre/duración ascendente-descendente, `CATEGORY_THEN_NAME`, `NONE`.
+- **Colores por efecto**: paleta exacta de 10 colores, validación `#RRGGBB`,
+  override on/off y reset por ID *namespaced* (`minecraft:speed`), IDs huérfanos
+  listados, selección inicial `minecraft:regeneration` sin crear override.
+- **Preajustes**: `VANILLA_COMPACT`, `COMPACT_TEXT`, `EXPANDED_READOUT` (conservan
+  los colores personalizados; los definidos en la spec coinciden con los del código).
+- **Idioma de la UI** (EN/ES) independiente del idioma del juego, con paridad de
+  claves entre `en_us.json` y `es_es.json`.
+- **Modo de Prueba** (extra v1.0.0 conservado): en *Configure Effects…* fuerza
+  pociones ficticias con cuenta regresiva en bucle en la vista previa, aunque
+  tengas efectos reales; se apaga solo al cerrar la pantalla.
+- **Render**: enganchado con la API oficial `HudElementRegistry` (0 mixins),
+  early-return cuando no hay jugador/efectos/HUD oculto/regla de visibilidad,
+  y sustitución del HUD vanilla según `vanillaEffectsMode`
+  (`SHOW_BOTH` / `CUSTOM_ONLY` / `VANILLA_ONLY`).
+- **Persistencia** (`config/effecttimer.json`): `configVersion`, guardado
+  atómico (tmp + move), recuperación ante JSON corrupto con copia
+  `.corrupt-<ts>.bak`, migración automática desde el formato plano de v1.0.0
+  (`blinkOnExpire → fadeOnLowDuration`, `posX/posY → CUSTOM + offsets`,
+  `showIcons → showIcon`, `textColor` descartado).
 
-| Campo            | Tipo                     | Default    | Descripción                                   |
-|------------------|--------------------------|------------|-----------------------------------------------|
-| `enabled`        | boolean                  | `true`     | Activar/desactivar el HUD de efectos          |
-| `posX` / `posY`  | int (px)                 | `4` / `4`  | Posición en pantalla (recortada a los bordes) |
-| `scale`          | float 0.50–2.50          | `1.0`      | Escala del HUD (paso 0.05)                    |
-| `orientation`    | enum                     | `VERTICAL` | Renderizado vertical u horizontal             |
-| `showIcons`      | boolean                  | `true`     | Ícono real del efecto (atlas `mob_effect`)    |
-| `showDuration`   | boolean                  | `true`     | Tiempo restante `01:30`                       |
-| `showName`       | boolean                  | `true`     | Nombre + nivel en romanos (`Velocidad II`)    |
-| `textColor`      | hex `#RRGGBB`            | `#FFFFFF`  | Color personalizado del texto                 |
-| `blinkOnExpire`  | boolean                  | `true`     | Parpadeo con < 10 s (fórmula de fade original)|
-
-Un JSON corrupto se copia a `effecttimer.json.corrupt-<ts>.bak` y se restauran
-los valores por defecto (mecanismo probado del `ConfigManager` padre, con
-escritura atómica).
-
-## Uso
-
-- **Abrir ajustes**: tecla `O` (recategorizable en Controles → Effect Timer) o,
-  sin ella, editando `config/effecttimer.json`.
-- **Modo de Prueba (Fase 4, MUST-HAVE)**: dentro de la pantalla de ajustes, el
-  botón **"Modo de Prueba: ON/OFF"** dibuja en vivo las pociones ficticias
-  `Velocidad II - 02:15`, `Fuerza - 00:45` y `Regeneración - 00:10` (contando
-  hacia atrás y en bucle, para calibrar también el parpadeo). Al **arrastrar los
-  sliders de Pos X/Y o Escala** la vista previa se fuerza igualmente. Al cerrar
-  la GUI o apagar el toggle, las pociones ficticias desaparecen y el HUD vuelve
-  a leer `client.player.getActiveEffects()`.
-- **Sin duplicados**: el HUD propio se engancha con
-  `HudElementRegistry.attachElementAfter(VanillaHudElements.STATUS_EFFECTS, ...)`
-  (pipeline oficial de Fabric, **sin Mixins**). El indicador vanilla queda
-  intacto, igual que en el mod padre cuando `vanillaEffectsMode = SHOW_BOTH`
-  (el modo de ocultado no pertenece a la spec de este standalone y fue
-  eliminado).
-- **Coste ~0% con la lista vacía** (Fase 5): sin efectos activos, con el HUD
-  apagado, con `F3+H`-style `hideGui` o sin jugador, `renderLive` devuelve tras
-  3–4 comprobaciones de campo, sin asignaciones ni recorrido de lista.
-
-## Decisos de la extracción
-
-1. **Nivel I oculto** (`hideLevelOne = true`, regla por defecto del original):
-   `Velocidad II` se muestra con sufijo y `Regeneración`/`Fuerza` sin él.
-2. El formato fija `mm:ss` con relleno (`01:30`), ancho de texto estable, según
-   los ejemplos de la spec.
-3. Se conservaron del original: íconos vía sprite atlas sin teñir + cuadrado de
-   color nativo como fallback, orden benéficos → neutros → perjudiciales por
-   nombre, ajuste al tickrate real del mundo (`tickRateManager().tickrate()`) y
-   el fade de expiración exacto.
-4. Sin dependencia de Mod Menu (se eliminó el repositorio Terraformers y el
-   entrypoint `modmenu`): el mod solo requiere **Fabric API**.
-
-## Compilar
+## Construir
 
 ```bash
-./gradlew build        # → build/libs/effect-timer-1.0.0.jar (+ -sources.jar)
-./gradlew test         # tests de formato/colores/persistencia
+./gradlew test build     # → build/libs/effect-timer-<versión>.jar
 ```
 
-Requisitos: JDK 21+ y acceso a los repositorios de Maven de Fabric/Mojang.
+## Release / descargas
 
-## Release automatizada (GitHub Actions)
+El workflow [Release](../../actions/workflows/release.yml) (etiquetas `v*`) corre
+`./gradlew test build --no-daemon`, sube los reportes de tests como artefacto y
+publica el `.jar` en [Releases](../../releases). Instalación: coloca el `.jar` en
+`.minecraft/mods` junto a Fabric Loader ≥ 0.20.1 y Fabric API para 1.21.11.
 
-Pipeline: [`.github/workflows/release.yml`](.github/workflows/release.yml).
+Última release: **[v1.0.0](../../releases/tag/v1.0.0)** (standalone de 10
+parámetros); la v1.1.0 corresponde al port 100 % del módulo Effects HUD.
 
-- **Trigger**: creación de un tag `v*` (p. ej. `v1.0.0`) o ejecución manual
-  (`workflow_dispatch`).
-- Runner `ubuntu-latest`, Temurin JDK 21, `chmod +x ./gradlew`,
-  `./gradlew build --no-daemon` (incluye los tests).
-- `softprops/action-gh-release@v2` crea/actualiza la Release del tag y adjunta
-  el `effect-timer-*.jar` de `build/libs/` (excluye `-sources`/`-dev`).
+## Verificación
 
-Descargas: <https://github.com/BlackBoneDel/EFFECT-HUD-/releases>
-
-
-## Licencia
-
-MIT, basado en `HUD-MODS` (© Customizable HUD Contributors / Denvdrite).
+Matriz función → prueba → resultado en [`docs/VERIFICATION.md`](docs/VERIFICATION.md).

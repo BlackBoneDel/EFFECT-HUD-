@@ -37,7 +37,18 @@ jobs:
             echo "tag=v${version}" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Build and test the mod
+      - name: Run the test battery
+        run: ./gradlew test --no-daemon
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: build/reports/tests/**
+          if-no-files-found: warn
+
+      - name: Build the mod jar
         run: ./gradlew build --no-daemon
 
       - name: Stage release artifacts (main jar; drop -sources/-dev)
