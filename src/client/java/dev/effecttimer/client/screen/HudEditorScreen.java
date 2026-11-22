@@ -15,6 +15,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
@@ -435,20 +436,23 @@ public final class HudEditorScreen extends AbstractCustomizableScreen {
 	}
 
 	@Override
-	public boolean mouseReleased(MouseButtonEvent event, boolean dragging) {
-		draggingElement = false;
-		resizingCorner = null;
-		activeGuides = List.of();
-		return super.mouseReleased(event, dragging);
+	public boolean mouseReleased(MouseButtonEvent event) {
+		if (event.button() == 0) {
+			draggingElement = false;
+			resizingCorner = null;
+			activeGuides = List.of();
+			return true;
+		}
+		return super.mouseReleased(event);
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == 256) { // Escape: cancelar y restaurar la snapshot de entrada
+	public boolean keyPressed(KeyEvent event) {
+		if (event.isEscape()) { // cancelar y restaurar la snapshot de entrada
 			cancelChanges();
 			return true;
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	@Override
