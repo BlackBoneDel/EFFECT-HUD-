@@ -38,7 +38,16 @@ jobs:
           fi
 
       - name: Run the test battery
-        run: ./gradlew test --no-daemon
+        run: |
+          set +e
+          ./gradlew test --no-daemon --stacktrace > /tmp/gradle.log 2>&1
+          code=$?
+          set -e
+          if [ $code -ne 0 ]; then
+            summary=$(grep -E "error:|FAILED|Could not|What went wrong" -A1 /tmp/gradle.log | tail -n 30 | tr '\n' '|')
+            echo "::error::GRADLE_TEST_FAIL: ${summary}"
+          fi
+          test $code -eq 0
 
       - name: Upload test reports
         if: always()
