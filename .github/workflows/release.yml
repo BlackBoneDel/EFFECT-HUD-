@@ -16,10 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the tagged commit
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up JDK 21 (Temurin)
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -40,8 +40,14 @@ jobs:
       - name: Build and test the mod
         run: ./gradlew build --no-daemon
 
-      - name: Show generated artifacts
-        run: ls -la build/libs/
+      - name: Stage release artifacts (main jar; drop -sources/-dev)
+        run: |
+          mkdir -p dist
+          find build/libs -maxdepth 1 -type f -name 'effect-timer-*.jar' \
+            ! -name '*-sources.jar' ! -name '*-dev.jar' -exec cp -f {} dist/ \;
+          test -n "$(ls -A dist)" || { echo "ERROR: no .jar produced in build/libs"; ls -la build/libs; exit 1; }
+          ls -la build/libs/
+          ls -la dist/
 
       - name: Publish GitHub Release with the .jar
         uses: softprops/action-gh-release@v2
@@ -50,7 +56,4 @@ jobs:
           name: Effect Timer ${{ steps.vars.outputs.tag }}
           generate_release_notes: true
           fail_on_unmatched_files: true
-          files: |
-            build/libs/effect-timer-*.jar
-            !build/libs/*-sources.jar
-            !build/libs/*-dev.jar
+          files: dist/*.jar
