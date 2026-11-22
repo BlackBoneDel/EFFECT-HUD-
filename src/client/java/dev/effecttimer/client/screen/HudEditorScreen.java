@@ -456,11 +456,6 @@ public final class HudEditorScreen extends AbstractCustomizableScreen {
 	}
 
 	@Override
-	public boolean shouldPause() {
-		return true;
-	}
-
-	@Override
 	public void onClose() {
 		flushPendingOnExit();
 		syncParent();
