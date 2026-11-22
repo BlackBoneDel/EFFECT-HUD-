@@ -103,6 +103,20 @@ escritura atómica).
 
 Requisitos: JDK 21+ y acceso a los repositorios de Maven de Fabric/Mojang.
 
+## Release automatizada (GitHub Actions)
+
+Pipeline: [`.github/workflows/release.yml`](.github/workflows/release.yml).
+
+- **Trigger**: creación de un tag `v*` (p. ej. `v1.0.0`) o ejecución manual
+  (`workflow_dispatch`).
+- Runner `ubuntu-latest`, Temurin JDK 21, `chmod +x ./gradlew`,
+  `./gradlew build --no-daemon` (incluye los tests).
+- `softprops/action-gh-release@v2` crea/actualiza la Release del tag y adjunta
+  el `effect-timer-*.jar` de `build/libs/` (excluye `-sources`/`-dev`).
+
+Descargas: <https://github.com/BlackBoneDel/EFFECT-HUD-/releases>
+
+
 ## Licencia
 
 MIT, basado en `HUD-MODS` (© Customizable HUD Contributors / Denvdrite).

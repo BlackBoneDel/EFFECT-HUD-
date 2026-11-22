@@ -1,0 +1,56 @@
+name: Release
+
+# Se dispara al crear una etiqueta v* (p. ej. v1.0.0) o manualmente desde
+# Actions → Release → Run workflow.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the tagged commit
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x ./gradlew
+
+      - name: Compute release tag
+        id: vars
+        run: |
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            echo "tag=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
+          else
+            version=$(grep -E '^mod_version=' gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
+            echo "tag=v${version}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build and test the mod
+        run: ./gradlew build --no-daemon
+
+      - name: Show generated artifacts
+        run: ls -la build/libs/
+
+      - name: Publish GitHub Release with the .jar
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.tag }}
+          name: Effect Timer ${{ steps.vars.outputs.tag }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            build/libs/effect-timer-*.jar
+            !build/libs/*-sources.jar
+            !build/libs/*-dev.jar
