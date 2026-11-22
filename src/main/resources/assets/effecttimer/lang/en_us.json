@@ -1,0 +1,23 @@
+{
+	"key.category.effecttimer.general": "Effect Timer",
+	"key.effecttimer.open_config": "Open Effect Timer Settings",
+	"effecttimer.screen.title": "Effect Timer Settings",
+	"effecttimer.screen.subtitle": "Potion timers HUD — drag the sliders to calibrate",
+	"effecttimer.option.enabled": "Effect Timer",
+	"effecttimer.option.posX": "Pos X",
+	"effecttimer.option.posY": "Pos Y",
+	"effecttimer.option.scale": "Scale",
+	"effecttimer.option.orientation": "Orientation",
+	"effecttimer.orientation.vertical": "Vertical",
+	"effecttimer.orientation.horizontal": "Horizontal",
+	"effecttimer.option.showIcons": "Icons",
+	"effecttimer.option.showName": "Effect Name",
+	"effecttimer.option.showDuration": "Duration",
+	"effecttimer.option.textColor": "Text Color",
+	"effecttimer.option.blinkOnExpire": "Blink < 10s",
+	"effecttimer.option.testMode": "Test Mode",
+	"effecttimer.state.on": "ON",
+	"effecttimer.state.off": "OFF",
+	"effecttimer.button.palette": "Palette",
+	"effecttimer.button.done": "Done"
+}

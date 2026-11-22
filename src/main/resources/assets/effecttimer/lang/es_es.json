@@ -1,0 +1,23 @@
+{
+	"key.category.effecttimer.general": "Effect Timer",
+	"key.effecttimer.open_config": "Abrir ajustes del Effect Timer",
+	"effecttimer.screen.title": "Ajustes del Effect Timer",
+	"effecttimer.screen.subtitle": "Temporizador de pociones — mueve los sliders para calibrar",
+	"effecttimer.option.enabled": "Effect Timer",
+	"effecttimer.option.posX": "Pos X",
+	"effecttimer.option.posY": "Pos Y",
+	"effecttimer.option.scale": "Escala",
+	"effecttimer.option.orientation": "Orientación",
+	"effecttimer.orientation.vertical": "Vertical",
+	"effecttimer.orientation.horizontal": "Horizontal",
+	"effecttimer.option.showIcons": "Íconos",
+	"effecttimer.option.showName": "Nombre del efecto",
+	"effecttimer.option.showDuration": "Duración",
+	"effecttimer.option.textColor": "Color del texto",
+	"effecttimer.option.blinkOnExpire": "Parpadeo < 10 s",
+	"effecttimer.option.testMode": "Modo de Prueba",
+	"effecttimer.state.on": "ON",
+	"effecttimer.state.off": "OFF",
+	"effecttimer.button.palette": "Paleta",
+	"effecttimer.button.done": "Hecho"
+}

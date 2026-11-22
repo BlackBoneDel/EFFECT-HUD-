@@ -1,0 +1,27 @@
+{
+	"schemaVersion": 1,
+	"id": "effecttimer",
+	"version": "${version}",
+	"name": "Effect Timer",
+	"description": "Standalone, ultra-lightweight potion/status-effect timer HUD extracted from Hud Utils: position, scale, orientation, icons, custom text color, blink-on-expire and a live preview (test) mode inside the native config screen.",
+	"authors": [
+		"Denvdrite"
+	],
+	"contact": {
+		"sources": "https://github.com/BlackBoneDel/EFFECT-HUD-"
+	},
+	"license": "MIT",
+	"icon": "assets/effecttimer/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"dev.effecttimer.client.EffectTimerMod"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
