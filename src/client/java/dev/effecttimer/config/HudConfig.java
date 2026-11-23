@@ -1,7 +1,7 @@
 package dev.effecttimer.config;
 
 /**
- * Raíz de configuración del Effect Timer (persistida en config/effecttimer.json).
+ * Raíz de configuración de Potion Effect (persistida en config/effecttimer.json).
  * Portada de {@code HudConfig} (HUD-MODS) reducida al módulo Effects HUD (único
  * módulo del standalone; los bloques de otros módulos se eliminaron). El campo de esquema pasa a llamarse
  * {@code configVersion} según la spec v1.1:
@@ -11,7 +11,7 @@ package dev.effecttimer.config;
  * </ul>
  */
 public final class HudConfig {
-	public static final int CURRENT_CONFIG_VERSION = 2;
+	public static final int CURRENT_CONFIG_VERSION = 3;
 
 	public int configVersion = CURRENT_CONFIG_VERSION;
 	public ModLanguage language = ModLanguage.ENGLISH;

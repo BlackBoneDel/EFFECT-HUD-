@@ -47,7 +47,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Batería v1.1.0 sobre la lógica portada de HUD-MODS (paquetes config/format/
+ * Batería v1.1.0–v1.2.0 sobre la lógica portada de HUD-MODS (paquetes config/format/
  * layout). Cubre los puntos de la spec que pueden validarse sin cliente de
  * Minecraft; los flujos de pantalla (vista previa, Modo de Prueba, editor
  * visual) se verifican en juego y quedan documentados en docs/VERIFICATION.md.
@@ -82,7 +82,9 @@ public final class EffectTimerBatteryTest {
 		assertEquals(PotionHudMode.NORMAL, d.potionHudMode);
 		assertEquals(PotionMiniDisplayMode.TIMER_TEXT, d.potionMiniDisplay);
 		assertTrue(d.customEffectColors.isEmpty());
-		assertEquals(2, HudConfig.CURRENT_CONFIG_VERSION);
+		assertTrue(d.customColorsEnabled, "v1.2: global de colores por defecto ON");
+		assertTrue(d.textShadow, "v1.2: sombra de texto por defecto ON");
+		assertEquals(3, HudConfig.CURRENT_CONFIG_VERSION);
 		assertEquals(ModLanguage.ENGLISH, new HudConfig().language);
 		VisibilityConfig vis = new VisibilityConfig();
 		assertTrue(vis.hideInInventory);
@@ -264,10 +266,10 @@ public final class EffectTimerBatteryTest {
 	@Test
 	public void durationColorThresholds() {
 		assertEquals(0xFFD8DEE9, DurationFormatter.durationColorArgb(100, 20f, false, false));
-		assertEquals(0xFFFF6B6B, DurationFormatter.durationColorArgb(200, 20f, false, true));
-		assertEquals(0xFFFFD166, DurationFormatter.durationColorArgb(600, 20f, false, true));
-		assertEquals(0xFF7CE8FF, DurationFormatter.durationColorArgb(-1, 20f, true, true));
-		assertEquals(0xFFE6EDF3, DurationFormatter.durationColorArgb(6000, 20f, false, true));
+		assertEquals(0xFFFF3B3B, DurationFormatter.durationColorArgb(200, 20f, false, true), "v1.2 rojo vívido");
+		assertEquals(0xFFFFE600, DurationFormatter.durationColorArgb(600, 20f, false, true), "v1.2 amarillo vívido");
+		assertEquals(0xFF00E5FF, DurationFormatter.durationColorArgb(-1, 20f, true, true), "v1.2 cian vívido");
+		assertEquals(0xFFFFFFFF, DurationFormatter.durationColorArgb(6000, 20f, false, true), "v1.2 neutro blanco");
 	}
 
 	@Test
@@ -331,10 +333,10 @@ public final class EffectTimerBatteryTest {
 		col.customEffectColors.put("minecraft:speed", new EffectColorOverride(true, "#00FF00"));
 		assertEquals(0xFF00FF00, EffectsColorResolver.durationColorArgb(
 				snap("minecraft:speed", "Speed", EffectCategoryKind.BENEFICIAL, 1, 200, 0xFF0000), col, 20f));
-		assertEquals(0xFFFF6B6B, EffectsColorResolver.durationColorArgb(
-				snap("minecraft:haste", "H", EffectCategoryKind.BENEFICIAL, 0, 100, 0x99AABB), col, 20f));
+		assertEquals(0xFFFF3B3B, EffectsColorResolver.durationColorArgb(
+				snap("minecraft:haste", "H", EffectCategoryKind.BENEFICIAL, 0, 100, 0x99AABB), col, 20f), "v1.2 rojo vívido");
 		col.customEffectColors.put("minecraft:slowness", new EffectColorOverride(false, "#00FF00"));
-		assertEquals(0xFFFF6B6B, EffectsColorResolver.durationColorArgb(
+		assertEquals(0xFFFF3B3B, EffectsColorResolver.durationColorArgb(
 				snap("minecraft:slowness", "S", EffectCategoryKind.HARMFUL, 0, 50, 0), col, 20f));
 	}
 
@@ -378,7 +380,7 @@ public final class EffectTimerBatteryTest {
 
 		assertTrue(HudLayoutEngine.hasAnyOverlap(List.of(new HudRect(0, 0, 10, 10), new HudRect(5, 5, 10, 10))));
 		assertFalse(HudLayoutEngine.hasAnyOverlap(List.of(new HudRect(0, 0, 10, 10), new HudRect(20, 20, 10, 10))));
-		assertEquals(10, HudAnchor.values().length, "9 predefinidos + CUSTOM");
+		assertEquals(14, HudAnchor.values().length, "13 predefinidos + CUSTOM (v1.2)");
 	}
 
 	@Test

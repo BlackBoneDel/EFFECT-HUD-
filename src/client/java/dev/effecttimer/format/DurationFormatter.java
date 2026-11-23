@@ -30,16 +30,16 @@ public final class DurationFormatter {
 			return 0xFFD8DEE9;
 		}
 		if (infinite || ticks < 0) {
-			return 0xFF7CE8FF;
+			return 0xFF00E5FF;
 		}
 		float safeTps = Float.isFinite(ticksPerSecond) && ticksPerSecond > 0.1f ? ticksPerSecond : 20.0f;
 		double seconds = ticks / safeTps;
 		if (seconds <= 10.0) {
-			return 0xFFFF6B6B;
+			return 0xFFFF3B3B;
 		}
 		if (seconds <= 30.0) {
-			return 0xFFFFD166;
+			return 0xFFFFE600;
 		}
-		return 0xFFE6EDF3;
+		return 0xFFFFFFFF;
 	}
 }

@@ -138,6 +138,19 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 		return Math.max(0, totalH - Math.max(20, listRect.height()));
 	}
 
+	/** Tamaño de la casilla del toggle por fila (v1.2, bloque 5). */
+	public static final int ROW_TOGGLE_SIZE = 11;
+
+	/**
+	 * Geometría pura del hit-box del toggle de override por fila, a la izquierda
+	 * de la muestra de color (que vive en rowX + rowW - 13). Devuelve [x, y, w, h]
+	 * en coordenadas de pantalla YA desplazadas (rowX/rowY del render).
+	 */
+	public static int[] rowToggleRect(int rowX, int rowW, int rowY) {
+		int boxY = rowY + (22 - ROW_TOGGLE_SIZE) / 2;
+		return new int[] { rowX + rowW - 13 - 14, boxY, ROW_TOGGLE_SIZE, ROW_TOGGLE_SIZE };
+	}
+
 	private void clampListScroll() {
 		listScrollOffset = Mth.clamp(listScrollOffset, 0, maxListScroll());
 	}
@@ -167,7 +180,11 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 		}
 
 		int searchY = bodyTop;
-		searchBox = addRenderableWidget(new EditBox(this.font, leftX, searchY, leftW, 18, t("effecttimer.effect_colors.search")));
+		// v1.2, bloque 5: interruptor global visible también en esta pantalla.
+		int globalColorsW = this.width >= 430 ? 108 : 0;
+		searchBox = addRenderableWidget(new EditBox(this.font, leftX, searchY,
+				Math.max(80, leftW - (globalColorsW > 0 ? globalColorsW + 6 : 0)), 18,
+				t("effecttimer.effect_colors.search")));
 		searchBox.setMaxLength(64);
 		searchBox.setValue(searchText);
 		searchBox.setTooltip(Tooltip.create(t("effecttimer.tooltip.effect_colors.search")));
@@ -175,6 +192,21 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 			searchText = text != null ? text : "";
 			applyFilter();
 		});
+		if (globalColorsW > 0 && workingConfig.effects != null) {
+			addRenderableWidget(net.minecraft.client.gui.components.CycleButton.booleanBuilder(
+					t("effecttimer.state.on"),
+					t("effecttimer.state.off"),
+					workingConfig.effects.customColorsEnabled
+			).withTooltip(val -> net.minecraft.client.gui.components.Tooltip.create(t(
+					"effecttimer.tooltip.effects.color_priority")))
+					.create(leftX + leftW - globalColorsW, searchY, globalColorsW, 18,
+							t("effecttimer.effects.custom_colors"), (btn, val) -> {
+								if (workingConfig.effects != null) {
+									workingConfig.effects.customColorsEnabled = val;
+									notifyConfigEdited();
+								}
+							}));
+		}
 
 		if (sideBySide) {
 			int listTop = searchY + 22;
@@ -293,6 +325,28 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 	private String defaultHexForSelected() {
 		EffectEntry sel = selectedEntry();
 		return sel != null ? sel.autoHex() : "#E6EDF3";
+	}
+
+	/** Toggle de override desde la casilla de la fila (v1.2, bloque 5). */
+	private void toggleRowOverride(EffectEntry entry) {
+		if (entry == null || workingConfig.effects == null) {
+			return;
+		}
+		if (workingConfig.effects.customEffectColors == null) {
+			workingConfig.effects.customEffectColors = new java.util.LinkedHashMap<>();
+		}
+		EffectColorOverride ov = workingConfig.effects.customEffectColors.get(entry.id());
+		if (ov == null) {
+			int rgb = entry.autoDisplayRgb() & 0x00FFFFFF;
+			String hex = String.format(java.util.Locale.ROOT, "#%06X", rgb);
+			workingConfig.effects.customEffectColors.put(entry.id(), new EffectColorOverride(true, hex));
+		} else {
+			ov.enabled = !ov.enabled; // el hex se conserva tal cual
+		}
+		notifyConfigEdited();
+		if (entry.id().equals(selectedEffectId)) {
+			syncSelectedControls();
+		}
 	}
 
 	private void toggleSelectedOverride() {
@@ -501,7 +555,7 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 				drawSmallIcon(graphics, entry, iconX, iconY);
 
 				int textX = iconX + 18;
-				int swatchAreaW = 16;
+				int swatchAreaW = 30;
 				int maxTextW = Math.max(20, rowW - 24 - swatchAreaW);
 				String title = entry.displayName();
 				if (this.font.width(title) > maxTextW) {
@@ -522,18 +576,31 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 				int sy = rowY + 6;
 				if (ov != null) {
 					int rgb = ColorHexUtils.parseRgb(ov.colorHex).orElse(entry.autoDisplayRgb());
-					if (ov.enabled) {
+					if (ov.enabled && workingConfig.effects != null && workingConfig.effects.customColorsEnabled) {
 						graphics.fill(sx, sy, sx + 9, sy + 9, 0xFF000000 | rgb);
 						graphics.renderOutline(sx, sy, 9, 9, 0xFFFFFFFF);
+					} else if (ov.enabled) {
+						// override guardado pero interruptor global apagado: atenuado
+						graphics.fill(sx, sy, sx + 9, sy + 9, ARGB.multiplyAlpha(0xFF000000 | rgb, 0.45f));
+						graphics.renderOutline(sx, sy, 9, 9, 0xFF64748B);
 					} else {
+						// pausado: color automático + tachado (el hex se conserva)
 						graphics.fill(sx, sy, sx + 9, sy + 9, 0xFF000000 | entry.autoDisplayRgb());
 						graphics.renderOutline(sx, sy, 9, 9, 0xFF64748B);
+						graphics.fill(sx, sy + 4, sx + 9, sy + 5, 0xFF94A3B8);
 					}
 				} else {
 					// Automatic Minecraft effect color indicator
 					graphics.fill(sx, sy, sx + 9, sy + 9, 0xFF000000 | entry.autoDisplayRgb());
 					graphics.renderOutline(sx, sy, 9, 9, 0xFF475569);
 				}
+				// casilla de activación por fila (v1.2): ✓ activo · – pausado · · ninguno
+				int[] tgl = rowToggleRect(rowX, rowW, rowY);
+				graphics.fill(tgl[0], tgl[1], tgl[0] + tgl[2], tgl[1] + tgl[3], 0x33000000);
+				graphics.renderOutline(tgl[0], tgl[1], tgl[2], tgl[3], ov != null && ov.enabled ? 0xFF38BDF8 : 0xFF475569);
+				String mark = ov == null ? "\u00B7" : (ov.enabled ? "\u2713" : "\u2013");
+				graphics.drawString(this.font, mark, tgl[0] + 1, tgl[1] + 1,
+						ov != null && ov.enabled ? 0xFFBAE6FD : 0xFF94A3B8, false);
 			}
 		} finally {
 			graphics.disableScissor();
@@ -583,6 +650,18 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 			}
 			int relY = (int) Math.floor(event.y()) - (listRect.y() + 2) + listScrollOffset;
 			int idx = relY / LIST_ROW_HEIGHT;
+			// v1.2, bloque 5: clic en la casilla de la fila = activar/pausar el
+			// override de ese efecto (sin seleccionar la fila).
+			if (idx >= 0 && idx < filteredEntries.size()) {
+				int hitRowW = listRect.width() - (maxListScroll() > 0 ? 10 : 4);
+				int[] toggle = rowToggleRect(listRect.x() + 2, hitRowW,
+						listRect.y() + 2 + idx * LIST_ROW_HEIGHT - listScrollOffset);
+				if (event.x() >= toggle[0] - 1 && event.x() <= toggle[0] + toggle[2] + 1
+						&& event.y() >= toggle[1] - 1 && event.y() <= toggle[1] + toggle[3] + 1) {
+					toggleRowOverride(filteredEntries.get(idx));
+					return true;
+				}
+			}
 			if (idx >= 0 && idx < filteredEntries.size()) {
 				if (searchBox != null) {
 					searchBox.setFocused(false);

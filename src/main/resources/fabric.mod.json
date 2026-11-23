@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "effecttimer",
   "version": "${version}",
-  "name": "Effect Timer",
-  "description": "100% port del módulo Effects HUD de Hud Utils como mod standalone ultraligero: HUD de temporizadores de pócimas/efectos con estilos (vanilla compacto, tarjeta, texto minimal, PotionHUD normal/mini), anclajes con editor visual, colores por efecto, presets, reglas de visibilidad, idioma propio EN/ES, vista previa en vivo y Modo de Prueba.",
+  "name": "Potion Effect",
+  "description": "Standalone potion effects HUD with quick positions, vivid automatic colors, per-effect color overrides and a visual editor \u2014 by Denvdrite.",
   "authors": [
     "Denvdrite"
   ],

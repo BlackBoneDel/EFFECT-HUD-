@@ -26,14 +26,14 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import org.lwjgl.glfw.GLFW;
 
 /**
- * Punto de entrada del Effect Timer standalone. Portado de
+ * Punto de entrada de Potion Effect (standalone). Portado de
  * {@code CustomizableHudClient} (repo padre) manteniendo su comportamiento:
  * <ul>
  *   <li>O abre la pantalla principal de configuración;</li>
  *   <li>H abre el editor visual (HUD editor);</li>
  *   <li>una tercera ligación SIN tecla asigna el toggle de activación/desactivación,
  *       que guarda el config al instante y lo anuncia en la action bar;</li>
- *   <li>los tres viven en su propia categoría de teclas "Effect Timer";</li>
+ *   <li>los tres viven en su propia categoría de teclas "Potion Effect";</li>
  *   <li>el HUD propio se engancha con la API oficial {@code HudElementRegistry}
  *       (sin mixins) y sustituye al HUD vanilla de efectos según el modo
  *       {@code vanillaEffectsMode}.</li>

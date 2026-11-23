@@ -29,6 +29,10 @@ public final class EffectsConfig {
 	public VanillaEffectsMode vanillaEffectsMode = VanillaEffectsMode.SHOW_BOTH;
 	public boolean fadeOnLowDuration = true;
 	public boolean colorDurationByRemaining = false;
+	/** v1.2: interruptor global de los colores personalizados por efecto. */
+	public boolean customColorsEnabled = true;
+	/** v1.2: sombra de texto en nombre, nivel y temporizador. */
+	public boolean textShadow = true;
 	public Map<String, EffectColorOverride> customEffectColors = new LinkedHashMap<>();
 
 	public EffectsConfig copy() {
@@ -58,6 +62,8 @@ public final class EffectsConfig {
 		copy.vanillaEffectsMode = vanillaEffectsMode;
 		copy.fadeOnLowDuration = fadeOnLowDuration;
 		copy.colorDurationByRemaining = colorDurationByRemaining;
+		copy.customColorsEnabled = customColorsEnabled;
+		copy.textShadow = textShadow;
 		copy.customEffectColors = new LinkedHashMap<>();
 		if (customEffectColors != null) {
 			for (Map.Entry<String, EffectColorOverride> entry : customEffectColors.entrySet()) {

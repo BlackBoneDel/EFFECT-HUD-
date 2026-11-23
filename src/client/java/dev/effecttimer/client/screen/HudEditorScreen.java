@@ -174,7 +174,32 @@ public final class HudEditorScreen extends AbstractCustomizableScreen {
 				.tooltip(Tooltip.create(t("effecttimer.tooltip.editor.cancel"))).build();
 		addRenderableWidget(cancelBtn);
 
-		computedToolbarHeight = 20 + PANEL_PAD * 2;
+		// v1.2, bloque 3: el mismo selector 3x2 vive en la barra del editor como
+		// segunda fila de mini-botones.
+		int row2Y = rowY + 24;
+		int qCount = AnchorQuickPicker.GRID.length;
+		int qW = Math.max(36, (innerW - gap * (qCount - 1)) / qCount);
+		java.util.List<net.minecraft.client.gui.components.Button> qBtns = AnchorQuickPicker.build(
+				effects().anchor,
+				anchor -> {
+					applyAnchor(anchor); // resetea offsets al salir de CUSTOM
+					this.rebuildWidgets();
+				},
+				this::t,
+				panelX + PANEL_PAD,
+				gap,
+				row2Y,
+				3,
+				qW,
+				16);
+		// En el editor se muestran como barra horizontal (6 en una fila), no en 3x2.
+		for (int qi = 0; qi < qBtns.size(); qi++) {
+			net.minecraft.client.gui.components.Button qbtn = qBtns.get(qi);
+			qbtn.setBounds(panelX + PANEL_PAD + qi * (qW + gap), row2Y, qW, 16);
+			addRenderableWidget(qbtn);
+		}
+
+		computedToolbarHeight = 44 + PANEL_PAD * 2;
 	}
 
 	private void syncEnabledLabel() {

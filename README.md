@@ -1,6 +1,6 @@
-# Effect Timer — Effects HUD 100 % standalone (Fabric)
+# Potion Effect — by Denvdrite
 
-*by Denvdrite*
+Effects HUD 100 % standalone para Fabric (MC 1.21.11). *Renombrado desde "Effect Timer" en v1.2.0; el id de mod, el paquete `dev.effecttimer` y el archivo `config/effecttimer.json` se mantienen para no romper configs.*
 
 Port **completo del módulo "Effects HUD"** de [Hud Utils (HUD-MODS)](https://github.com/BlackBoneDel/HUD-MODS)
 a un mod **independiente**: la lógica del repo padre se portó tal cual (clases de
@@ -8,6 +8,15 @@ config, formato, orden, colores, layout y pantallas) y se extirpó todo rastro d
 los demás módulos (no queda una sola referencia a Armor/Durabilidad). La spec de
 v1.0.0 (10 parámetros) queda **derogada**: esta versión expone la superficie
 completa del módulo original.
+
+## Icono (pixel art original)
+
+El icono `src/main/resources/assets/effecttimer/icon.png` (128×128 RGBA) se
+genera con `python3 tools/generate_icon.py` (requiere Pillow): dibujo original
+sobre cuadrícula lógica de 16×16 escalada con nearest-neighbor, paleta ≤ 12
+colores, fondo transparente y vista previa ampliada en `docs/icon-preview.png`.
+Regenerarlo tras cualquier cambio de arte; los tests JUnit `IconPixelArtTest`
+exigen bloques 8×8 uniformes y el resto de invariantes del pixel art.
 
 ## Versiones (idénticas a las del repositorio fuente)
 
@@ -29,7 +38,7 @@ completa del módulo original.
   imán a rejilla + guías de centrado; `Escape`/Cancelar restaura lo que había al entrar.
 - **Tercera ligación sin asignar** → toggle on/off que guarda al instante y avisa
   en la action bar.
-- Las tres teclas viven en su propia categoría **"Effect Timer"** del juego.
+- Las tres teclas viven en su propia categoría **"Potion Effect"** del juego.
 - Integración opcional con **Mod Menu** (abre la misma pantalla principal).
 
 ## Funcionalidad portada del módulo original
@@ -68,7 +77,7 @@ completa del módulo original.
 ## Construir
 
 ```bash
-./gradlew test build     # → build/libs/effect-timer-<versión>.jar
+./gradlew test build     # → build/libs/potion-effect-<versión>.jar
 ```
 
 ## Release / descargas

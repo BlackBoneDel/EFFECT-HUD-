@@ -3,6 +3,7 @@ package dev.effecttimer.client.screen;
 import dev.effecttimer.client.hud.EffectsHudRenderer;
 import dev.effecttimer.client.hud.LiveDataCollector;
 import dev.effecttimer.config.ConfigValidator;
+import dev.effecttimer.config.EffectsFramePolicy;
 import dev.effecttimer.config.EffectColorOverride;
 import dev.effecttimer.config.EffectSortMode;
 import dev.effecttimer.config.EffectsConfig;
@@ -91,9 +92,21 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 			);
 		}
 
-		addSectionLabel(t("effecttimer.section.general"), leftX, y);
+		// v1.2, bloque 8: «HUD vanilla» es el PRIMER control de la pantalla,
+		// al inicio de la sección Visibilidad (junto al toggle global).
+		addSectionLabel(t("effecttimer.section.visibility"), leftX, y);
 		y += 16;
 
+		addScrollWidget(
+				CycleButton.builder((VanillaEffectsMode m) -> t(m.translationKey()), effects.vanillaEffectsMode)
+						.withValues(List.of(VanillaEffectsMode.values()))
+						.withTooltip(val -> Tooltip.create(t(val.tooltipKey())))
+						.create(leftX, 0, halfW, 20, t("effecttimer.effects.vanilla_mode"), (btn, val) -> {
+							effects.vanillaEffectsMode = val;
+							notifyConfigEdited();
+						}),
+				y
+		);
 		addScrollWidget(
 				CycleButton.booleanBuilder(
 						t("effecttimer.state.on"),
@@ -102,23 +115,16 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 				).withTooltip(val -> Tooltip.create(t(val
 						? "effecttimer.tooltip.effects.enabled_on"
 						: "effecttimer.tooltip.effects.enabled_off")))
-						.create(leftX, 0, halfW, 20, t("effecttimer.option.enabled"), (btn, val) -> {
+						.create(rightX, 0, halfW, 20, t("effecttimer.option.enabled"), (btn, val) -> {
 							effects.enabled = val;
 							notifyConfigEdited();
 						}),
 				y
 		);
-		addScrollWidget(
-				CycleButton.builder((VanillaEffectsMode m) -> t(m.translationKey()), effects.vanillaEffectsMode)
-						.withValues(List.of(VanillaEffectsMode.values()))
-						.withTooltip(val -> Tooltip.create(t(val.tooltipKey())))
-						.create(rightX, 0, halfW, 20, t("effecttimer.effects.vanilla_mode"), (btn, val) -> {
-							effects.vanillaEffectsMode = val;
-							notifyConfigEdited();
-						}),
-				y
-		);
 		y += ROW_HEIGHT;
+
+		addSectionLabel(t("effecttimer.section.general"), leftX, y);
+		y += 16;
 
 		addScrollWidget(
 				CycleButton.builder((EffectsVisualStyle st) -> t(st.translationKey()), effects.style)
@@ -145,6 +151,29 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 				y
 		);
 		y += ROW_HEIGHT;
+
+		// v1.2, bloque 3: selector rápido 3x2 (Alta/Media/Baja × I/D). Al pulsar
+		// un botón fijo se aplican offsets 0 (contrato de salida de CUSTOM).
+		addSectionLabel(t("effecttimer.section.quick_positions"), leftX, y);
+		y += 14;
+		java.util.List<net.minecraft.client.gui.components.Button> quickButtons = AnchorQuickPicker.build(
+				effects.anchor,
+				anchor -> {
+					AnchorQuickPicker.applyFixedAnchor(effects, anchor);
+					notifyConfigEdited();
+					this.rebuildWidgets();
+				},
+				this::t, leftX, 6, y, 3, (panelW - 6) / 2, 20);
+		for (int qRow = 0; qRow < AnchorQuickPicker.ROWS; qRow++) {
+			for (int qCol = 0; qCol < AnchorQuickPicker.COLS; qCol++) {
+				int qIndex = qRow * AnchorQuickPicker.COLS + qCol;
+				if (qIndex < quickButtons.size()) {
+					addScrollWidget(quickButtons.get(qIndex), y);
+				}
+			}
+			y += 23;
+		}
+		y += 6;
 
 		addScrollWidget(
 				CycleButton.builder((HudOrientation o) -> t(o.translationKey()), effects.orientation)
@@ -209,10 +238,14 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 						.create(leftX, 0, halfW, 20, t("effecttimer.effects.show_background"), (btn, val) -> {
 							effects.showEffectBackground = val;
 							notifyConfigEdited();
+							// v1.2: el control de borde depende del estado del fondo.
+							this.rebuildWidgets();
 						}),
 				y
 		);
-		addScrollWidget(
+		// v1.2, bloque 4: sin fondo no hay marco; el control de borde se muestra
+		// deshabilitado (en gris) con tooltip, pero el valor guardado se conserva.
+		CycleButton<Boolean> borderBtn =
 				CycleButton.booleanBuilder(
 						t("effecttimer.state.on"),
 						t("effecttimer.state.off"),
@@ -223,9 +256,12 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 						.create(rightX, 0, halfW, 20, t("effecttimer.effects.show_border"), (btn, val) -> {
 							effects.showEffectBorder = val;
 							notifyConfigEdited();
-						}),
-				y
-		);
+						});
+		borderBtn.active = EffectsFramePolicy.borderControlEnabled(effects.showEffectBackground);
+		if (!EffectsFramePolicy.borderControlEnabled(effects.showEffectBackground)) {
+			borderBtn.setTooltip(Tooltip.create(t("effecttimer.tooltip.effects.border_requires_background")));
+		}
+		addScrollWidget(borderBtn, y);
 		y += ROW_HEIGHT;
 
 		addScrollWidget(
@@ -278,6 +314,38 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 				).bounds(leftX, 0, panelW, 20)
 						.tooltip(Tooltip.create(t("effecttimer.tooltip.effect_colors")))
 						.build(),
+				y
+		);
+		y += ROW_HEIGHT;
+
+		// v1.2, bloque 5: interruptor GLOBAL de colores personalizados.
+		addScrollWidget(
+				CycleButton.booleanBuilder(
+						t("effecttimer.state.on"),
+						t("effecttimer.state.off"),
+						effects.customColorsEnabled
+				).withTooltip(val -> Tooltip.create(t(val
+						? "effecttimer.tooltip.effects.custom_colors_on"
+						: "effecttimer.tooltip.effects.custom_colors_off")))
+						.create(leftX, 0, halfW, 20, t("effecttimer.effects.custom_colors"), (btn, val) -> {
+							effects.customColorsEnabled = val;
+							notifyConfigEdited();
+						}),
+				y
+		);
+		// v1.2, bloque 7: sombra de texto.
+		addScrollWidget(
+				CycleButton.booleanBuilder(
+						t("effecttimer.state.on"),
+						t("effecttimer.state.off"),
+						effects.textShadow
+				).withTooltip(val -> Tooltip.create(t(val
+						? "effecttimer.tooltip.effects.text_shadow_on"
+						: "effecttimer.tooltip.effects.text_shadow_off")))
+						.create(rightX, 0, halfW, 20, t("effecttimer.option.text_shadow"), (btn, val) -> {
+							effects.textShadow = val;
+							notifyConfigEdited();
+						}),
 				y
 		);
 		y += ROW_HEIGHT;

@@ -27,7 +27,7 @@ public final class BrandingAndAnchorsTest {
 	// ---------- §ANCLAJES ----------
 	@Test
 	public void anchorCatalogHasNinePresetsPlusCustom() {
-		assertEquals(10, HudAnchor.values().length, "9 predefinidos + CUSTOM");
+		assertEquals(14, HudAnchor.values().length, "13 predefinidos + CUSTOM (v1.2)");
 		assertNotNull(HudAnchor.valueOf("HOTBAR_LEFT"));
 		assertNotNull(HudAnchor.valueOf("HOTBAR_RIGHT"));
 		assertNotNull(HudAnchor.valueOf("CUSTOM"));

@@ -63,7 +63,7 @@ jobs:
       - name: Stage release artifacts (main jar; drop -sources/-dev)
         run: |
           mkdir -p dist
-          find build/libs -maxdepth 1 -type f -name 'effect-timer-*.jar' \
+          find build/libs -maxdepth 1 -type f -name 'potion-effect-*.jar' \
             ! -name '*-sources.jar' ! -name '*-dev.jar' -exec cp -f {} dist/ \;
           test -n "$(ls -A dist)" || { echo "ERROR: no .jar produced in build/libs"; ls -la build/libs; exit 1; }
           ls -la build/libs/
@@ -73,7 +73,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.vars.outputs.tag }}
-          name: Effect Timer ${{ steps.vars.outputs.tag }}
+          name: Potion Effect ${{ steps.vars.outputs.tag }}
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: dist/*.jar

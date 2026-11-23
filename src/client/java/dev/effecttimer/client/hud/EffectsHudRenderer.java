@@ -2,6 +2,8 @@ package dev.effecttimer.client.hud;
 
 import dev.effecttimer.client.EffectTimerMod;
 import dev.effecttimer.config.ConfigValidator;
+import dev.effecttimer.config.EffectsFramePolicy;
+import dev.effecttimer.config.TextShadowRule;
 import dev.effecttimer.config.EffectsConfig;
 import dev.effecttimer.config.EffectsVisualStyle;
 import dev.effecttimer.config.HudAnchor;
@@ -275,7 +277,10 @@ public final class EffectsHudRenderer {
 		int h = placement.unscaledHeight();
 
 		boolean drawBg = config.showEffectBackground;
-		boolean drawBorder = config.showEffectBorder;
+		// v1.2 «sin fondo = sin marco»: el borde guardado se conserva pero solo
+		// se dibuja con el fondo activado.
+		boolean drawBorder = EffectsFramePolicy.drawFrame(config);
+		boolean shadow = TextShadowRule.shadow(config);
 		float bgOpacity = ConfigValidator.clampInt(
 				config.backgroundOpacityPercent,
 				ConfigValidator.MIN_OPACITY_PERCENT,
@@ -312,10 +317,10 @@ public final class EffectsHudRenderer {
 					int border = ARGB.colorFromFloat(0.55f * alpha, 0.22f, 0.27f, 0.35f);
 					graphics.renderOutline(x, y, w, h, border);
 				}
-				if (drawBg || drawBorder) {
-					int accent = ARGB.multiplyAlpha(EffectsColorResolver.accentColorArgb(snap, config), alpha);
-					graphics.fill(x + 1, y + 1, x + 3, y + h - 1, accent);
-				}
+				// El acento lateral es decorativo (no es marco): se mantiene
+				// aunque no haya fondo ni borde (spec v1.2, bloque 4).
+				int accent = ARGB.multiplyAlpha(EffectsColorResolver.accentColorArgb(snap, config), alpha);
+				graphics.fill(x + 1, y + 1, x + 3, y + h - 1, accent);
 			}
 			case MINIMAL_TEXT -> {
 				if (drawBg && bgOpacity > 0.0f) {
@@ -358,22 +363,22 @@ public final class EffectsHudRenderer {
 			int textY = y + Math.max(0, (h - font.lineHeight) / 2);
 			int cursorX = textX;
 			if (!title.isEmpty()) {
-				graphics.drawString(font, title, cursorX, textY, titleColor, true);
+				graphics.drawString(font, title, cursorX, textY, titleColor, shadow);
 				cursorX += font.width(title) + 6;
 			}
 			if (!duration.isEmpty()) {
-				graphics.drawString(font, duration, cursorX, textY, durationColor, true);
+				graphics.drawString(font, duration, cursorX, textY, durationColor, shadow);
 			}
 		} else {
 			int lines = (title.isEmpty() ? 0 : 1) + (duration.isEmpty() ? 0 : 1);
 			int textBlockH = lines == 2 ? (font.lineHeight * 2 + 1) : font.lineHeight;
 			int textY = y + Math.max(0, (h - textBlockH) / 2);
 			if (!title.isEmpty()) {
-				graphics.drawString(font, title, textX, textY, titleColor, true);
+				graphics.drawString(font, title, textX, textY, titleColor, shadow);
 				textY += font.lineHeight + 1;
 			}
 			if (!duration.isEmpty()) {
-				graphics.drawString(font, duration, textX, textY, durationColor, true);
+				graphics.drawString(font, duration, textX, textY, durationColor, shadow);
 			}
 		}
 	}
@@ -395,6 +400,7 @@ public final class EffectsHudRenderer {
 		int y = placement.unscaledY();
 		int w = placement.unscaledWidth();
 		int h = placement.unscaledHeight();
+		boolean shadow = TextShadowRule.shadow(config);
 		PotionHudMode mode = config.potionHudMode != null ? config.potionHudMode : PotionHudMode.NORMAL;
 		PotionMiniDisplayMode miniDisplay = config.potionMiniDisplay != null ? config.potionMiniDisplay : PotionMiniDisplayMode.TIMER_TEXT;
 
@@ -431,7 +437,7 @@ public final class EffectsHudRenderer {
 					try {
 						pose.translate(iconX + 16, iconY + 10);
 						pose.scale(lvlScale, lvlScale);
-						graphics.drawString(font, row.levelPart(), -lvlW, 0, titleColor, true);
+						graphics.drawString(font, row.levelPart(), -lvlW, 0, titleColor, shadow);
 					} finally {
 						pose.popMatrix();
 					}
@@ -444,7 +450,7 @@ public final class EffectsHudRenderer {
 				try {
 					pose.translate(x + (w / 2.0f), y + padY);
 					pose.scale(lvlScale, lvlScale);
-					graphics.drawString(font, row.levelPart(), -Math.round(lvlW / 2.0f), 0, titleColor, true);
+					graphics.drawString(font, row.levelPart(), -Math.round(lvlW / 2.0f), 0, titleColor, shadow);
 				} finally {
 					pose.popMatrix();
 				}
@@ -465,7 +471,7 @@ public final class EffectsHudRenderer {
 					try {
 						pose.translate(x + (w / 2.0f), durY);
 						pose.scale(durScale, durScale);
-						graphics.drawString(font, row.duration(), -Math.round(durW / 2.0f), 0, durationColor, true);
+						graphics.drawString(font, row.duration(), -Math.round(durW / 2.0f), 0, durationColor, shadow);
 					} finally {
 						pose.popMatrix();
 					}
@@ -496,11 +502,11 @@ public final class EffectsHudRenderer {
 		int textBlockH = lines == 2 ? (font.lineHeight * 2 + 1) : font.lineHeight;
 		int textY = y + Math.max(0, (h - textBlockH) / 2);
 		if (!title.isEmpty()) {
-			graphics.drawString(font, title, textX, textY, titleColor, true);
+			graphics.drawString(font, title, textX, textY, titleColor, shadow);
 			textY += font.lineHeight + 1;
 		}
 		if (!duration.isEmpty()) {
-			graphics.drawString(font, duration, textX, textY, durationColor, true);
+			graphics.drawString(font, duration, textX, textY, durationColor, shadow);
 		}
 	}
 

@@ -6,6 +6,12 @@ public enum HudAnchor {
 	// geometría fija de la hotbar (182 px centrados).
 	HOTBAR_LEFT("effecttimer.anchor.hotbar_left", "effecttimer.tooltip.anchor.hotbar_left"),
 	HOTBAR_RIGHT("effecttimer.anchor.hotbar_right", "effecttimer.tooltip.anchor.hotbar_right"),
+	// Alturas lateras v1.2: el centro vertical del módulo queda al 25 % / 75 %
+	// de la altura de pantalla; el margen horizontal es el mismo de CENTER_*.
+	SIDE_HIGH_LEFT("effecttimer.anchor.side_high_left", "effecttimer.tooltip.anchor.side_high_left"),
+	SIDE_HIGH_RIGHT("effecttimer.anchor.side_high_right", "effecttimer.tooltip.anchor.side_high_right"),
+	SIDE_LOW_LEFT("effecttimer.anchor.side_low_left", "effecttimer.tooltip.anchor.side_low_left"),
+	SIDE_LOW_RIGHT("effecttimer.anchor.side_low_right", "effecttimer.tooltip.anchor.side_low_right"),
 	CENTER_LEFT("effecttimer.anchor.center_left", "effecttimer.tooltip.anchor.center_left"),
 	CENTER_RIGHT("effecttimer.anchor.center_right", "effecttimer.tooltip.anchor.center_right"),
 	CENTER_BOTTOM("effecttimer.anchor.center_bottom", "effecttimer.tooltip.anchor.center_bottom"),

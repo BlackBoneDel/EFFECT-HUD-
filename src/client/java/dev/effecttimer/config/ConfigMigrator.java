@@ -3,7 +3,7 @@ package dev.effecttimer.config;
 import com.google.gson.JsonObject;
 
 /**
- * Migraciones JSON de una sola vez del Effect Timer standalone.
+ * Migraciones JSON de una sola vez de Potion Effect (standalone).
  *
  * <p>Regla principal (spec v1.1, punto 38): si existe un config plano heredado
  * de v1.0.0 (claves {@code enabled, posX, posY, scale, orientation, showIcons,
@@ -26,6 +26,27 @@ public final class ConfigMigrator {
 	public static final int LEGACY_STANDALONE_VERSION = 1;
 
 	private ConfigMigrator() {
+	}
+
+	/**
+	 * Migración v2 → v3 (v1.2): añade {@code customColorsEnabled=true} y
+	 * {@code textShadow=true} sin tocar nada más. Gson ya deja el default de
+	 * campo cuando la clave falta; este paso lo hace explícito y verificable.
+	 */
+	static boolean migrateToV3(HudConfig target) {
+		if (target == null || target.effects == null) {
+			return false;
+		}
+		boolean changed = false;
+		if (!target.effects.customColorsEnabled) {
+			// Un config v2 nunca tuvo el campo: si Gson lo dejó en false es que
+			// venía explícitamente apagado… no existe ese caso en v2, así que
+			// forzar true solo se nota en configs corruptos; lo dejamos en true.
+			changed = true;
+		}
+		target.effects.customColorsEnabled = true;
+		target.effects.textShadow = true;
+		return changed;
 	}
 
 	/** @return true si el target cambió y conviene re-guardar el archivo. */
@@ -51,6 +72,7 @@ public final class ConfigMigrator {
 		}
 
 		if (sourceVersion < HudConfig.CURRENT_CONFIG_VERSION || !hasVersionField) {
+			migrated |= migrateToV3(target);
 			target.configVersion = HudConfig.CURRENT_CONFIG_VERSION;
 			migrated = true;
 		}

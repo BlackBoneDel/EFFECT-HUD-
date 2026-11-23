@@ -23,6 +23,8 @@ public final class PresetCatalog {
 			return;
 		}
 		target.configVersion = HudConfig.CURRENT_CONFIG_VERSION;
+		boolean preserveCustomColors = target.effects != null && target.effects.customColorsEnabled;
+		boolean preserveTextShadow = target.effects != null && target.effects.textShadow;
 		Map<String, EffectColorOverride> preservedColors = new LinkedHashMap<>();
 		if (target.effects != null && target.effects.customEffectColors != null) {
 			for (Map.Entry<String, EffectColorOverride> entry : target.effects.customEffectColors.entrySet()) {
@@ -78,5 +80,9 @@ public final class PresetCatalog {
 		}
 
 		target.effects.customEffectColors = preservedColors;
+		// v1.2: los preajustes NO cambian el interruptor global de colores ni
+		// la sombra de texto (bloque 5.5 y bloque 7).
+		target.effects.customColorsEnabled = preserveCustomColors;
+		target.effects.textShadow = preserveTextShadow;
 	}
 }

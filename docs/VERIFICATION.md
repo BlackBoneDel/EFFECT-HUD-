@@ -1,4 +1,4 @@
-# VERIFICATION.md — Effect Timer v1.1.1 (port 100 % del módulo Effects HUD)
+# VERIFICATION.md — Potion Effect v1.2.0 (port 100 % del módulo Effects HUD)
 
 ## Cómo se verificó (transparencia)
 
@@ -6,14 +6,18 @@ En el sandbox **no se puede ejecutar Gradle** (sin acceso a Maven Central /
 maven.fabricmc.net / services.gradle.org) ni lanzar Minecraft. Por ello la
 verificación local se hizo con dos canales y hay que distinguirlos:
 
-- **[J] JUnit real en CI** — `./gradlew test` ejecuta
-  `EffectTimerBatteryTest` (20 tests) + `BrandingAndAnchorsTest` (10 tests) =
-  **30 tests**; Gradle aborta el build si falla alguno. Estos son los únicos
-  tests que viajan con el repo y corren contra el entorno oficial.
+- **[J] JUnit real en CI** — `./gradlew test` ejecuta la batería histórica
+  (`EffectTimerBatteryTest` 20 + `BrandingAndAnchorsTest` 10) y las 9 clases
+  nuevas de v1.2 (`PotionEffectRenameTest` 4, `IconPixelArtTest` 4,
+  `SideAnchorsTest` 6, `BorderRequiresBackgroundTest` 6, `CustomColorsToggleTest` 6,
+  `VividColorsTest` 7, `TextShadowTest` 5, `OptionsOrderTest` 3,
+  `ConfigMigrationV3Test` 4): **76 tests**; Gradle aborta el build si falla
+  alguno. Estos son los únicos tests que viajan con el repo y corren contra el
+  entorno oficial.
 - **[H] arnés local (harness-only)** — las clases puras (`config/`, `format/`,
   `layout/`) compiladas con el `javac` de OpenJDK 21 portado a WebAssembly
   (0 errores, 56 classes) y ejecutadas en JVM (jdk4py Java 21):
-  **162 aserciones → `RESULT passed=162 failed=0`**. Estas aserciones *no*
+  **195 aserciones → `RESULT passed=195 failed=0`** (incluye los bloques v1.2: frame, laterales, vívido con punto fijo, globales y round-trips). Estas aserciones *no*
   viven en el repo ni corren en CI; son verificación local de esta sesión.
   Cuando una fila dice [H] a secas, esa lógica **no** tiene test JUnit.
 - **[—] sin prueba automática** — solo compila en CI (Loom, contra las APIs de
@@ -73,9 +77,23 @@ nombra el bloque) · **[—]** sin prueba automática · **smoke** pendiente en 
 | 38 | Migración v1.0.0→v1.1 (blink→fade, posX/Y→CUSTOM, showIcons→showIcon, textColor fuera, v1→v2, re-save) | [J] `migratesLegacyStandaloneKeys` + [H] m01–m13 | PASS |
 | 39 | **Branding v1.1.1**: icono PNG 128×128 RGBA dibujo original referenciado; `authors=["Denvdrite"]`, sin `contributors`, sin nombres/enlaces del repo original en `contact`/homepage/issues; LICENSE intacto; «by Denvdrite» en pantalla, README y release | [J] `iconIsOriginal128x128PngWithAlpha`, `modMetadataIsBrandedClean`, `creditPresentInBothLanguagesAndReadme`, `noArmorReferencesInSources` | PASS (en cuanto CI corra la batería nueva) |
 
+## Bloques de la v1.2 (nuevos, matriz propia)
+
+| # | Función v1.2 | Prueba real | Resultado |
+|---|--------------|-------------|-----------|
+| B1 | Renombre «Potion Effect» (id/paquete/config intactos), jar `potion-effect-*.jar` | [J] `PotionEffectRenameTest` (fabric.mod, escaneo de TODOS los valores lang, README, gradle.properties + workflow) | PASS en JUnit; texto visible de otras pantallas revisado a mano |
+| B2 | Icono pixel art 16×16 → 128 nearest, ≤12 colores, gotas splash, `tools/generate_icon.py` + `docs/icon-preview.png` | [J] `IconPixelArtTest` (ImageIO: bloques 8×8 uniformes, esquinas/margen transparentes, paleta, preview 512) | PASS |
+| B3 | 4 anclajes laterales (25/50/75 %) + selector 3×2 en pantalla y editor, offsets reset al salir de CUSTOM, 13+CUSTOM en dropdown, EN/ES | [J] `SideAnchorsTest` (6 tests: catálogo, 3 resoluciones × 3 escalas, margen = CENTER_*, clamp vertical/horizontal, grid, round-trip + migración) + [H] la01–la05 | PASS motor y datos; render en pantalla smoke pendiente |
+| B4 | Sin fondo = sin marco (5 estilos + potion mini), valor de borde conservado, control deshabilitado con tooltip, acento CLEAN_CARD siempre | [J] `BorderRequiresBackgroundTest` (6 tests: matriz, conservación, control, round-trip, scan del renderer, coherencia de preajustes) + [H] fr01–fr03 | PASS; aspecto final de presets reportado en la entrega |
+| B5 | Global `customColorsEnabled` (default true) + toggle por fila con casilla, cadena de prioridad, preview/Modo de Prueba al instante, presets no lo tocan, reset lo reactiva | [J] `CustomColorsToggleTest` (6 tests) + [H] gc01–gc04; la casilla dibujada y el hit-test [—] | PASS lógica; UI smoke pendiente |
+| B6 | `vividize` vívido con suelo de luminancia y punto fijo idempotente; hexes por tiempo `#FF3B3B/#FFE600/#FFFFFF/#00E5FF`; paleta intacta | [J] `VividColorsTest` (7 tests, espectro amplio) + [H] vi02–vi05 + k03 | PASS; tabla docs/vivid-colors.md (ver DESVIACIÓN de colores base en ese doc) |
+| B7 | `textShadow` default true, aplicado a nombre/nivel/temporizador (incl. mini) en HUD, preview y test mode | [J] `TextShadowTest` (5 tests: defaults, regla, scan de los drawString del renderer, round-trip, preset/no-preset) + [H] sh01–sh02 | PASS regla; sombreado visual smoke pendiente |
+| B8 | «HUD vanilla» como primer control bajo «Visibilidad» en Configurar efectos | [J] `OptionsOrderTest` (orden real de init + grid compartido con el editor) — el orden de widgets en runtime deriva de init() | PASS estructural; visibilidad sin scroll a 854×480 y 1080@scale3 smoke pendiente |
+| B9 | configVersion 3 con cadena v1→v2→v3 y v2→v3 puntual; release por CI | [J] `ConfigMigrationV3Test` (4 tests, incluye backup `.corrupt-*.bak` intacto) + CI | PASS |
+
 ## Lo que sigue **sin verificar en juego** (honesto)
 
-Todo lo marcado [—] o «smoke»: pulsación de teclas, render real (estilos, fade,
+Todo lo marcado [—] o «smoke» (incluidos los humos de v1.2: casilla de toggle por fila, atenuación global OFF, selector 3×2 pintado, botón de borde en gris con tooltip, sombra de texto real, «HUD vanilla» visible sin scroll en 854×480 y 1080/scale 2-3, colores vívidos y el icono renderizados por Minecraft): pulsación de teclas, render real (estilos, fade,
 fondo/borde, preview, editor con ratón, tooltips, guardado con chat visible),
 integración Mod Menu y Fabric API, y la posición visual exacta de los anclajes
 de hotbar en pantalla. Nada de esto es testeable sin lanzar Minecraft.

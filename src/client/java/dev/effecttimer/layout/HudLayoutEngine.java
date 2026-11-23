@@ -56,6 +56,22 @@ public final class HudLayoutEngine {
 		int baseX;
 		int baseY;
 		switch (safeAnchor) {
+			case SIDE_HIGH_LEFT -> {
+				baseX = 8;
+				baseY = screenHeight / 4 - scaledHeight / 2;
+			}
+			case SIDE_HIGH_RIGHT -> {
+				baseX = screenWidth - scaledWidth - 8;
+				baseY = screenHeight / 4 - scaledHeight / 2;
+			}
+			case SIDE_LOW_LEFT -> {
+				baseX = 8;
+				baseY = screenHeight * 3 / 4 - scaledHeight / 2;
+			}
+			case SIDE_LOW_RIGHT -> {
+				baseX = screenWidth - scaledWidth - 8;
+				baseY = screenHeight * 3 / 4 - scaledHeight / 2;
+			}
 			case HOTBAR_LEFT -> {
 				baseX = screenWidth / 2 - 124 - scaledWidth;
 				baseY = screenHeight - scaledHeight - 2;
