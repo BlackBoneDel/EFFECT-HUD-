@@ -79,6 +79,6 @@ textos de la spec §21/§22).
 
 ## Resultado de la pipeline v1.1.0
 
-- Run de la etiqueta `v1.1.0`: https://github.com/BlackBoneDel/EFFECT-HUD-/actions/runs/45086646968 — **completed success** (todas las steps verdes: `test` → `Upload test reports` → `build` → `Publish`).
+- Run de la etiqueta `v1.1.0`: https://github.com/BlackBoneDel/EFFECT-HUD-/actions/runs/45087057824 — **completed success** (todas las steps verdes: `test` → `Upload test reports` → `build` → `Publish`).
 - `./gradlew test` (17 tests JUnit) → verde en CI (Gradle aborta el build ante cualquier test fallido).
 - Release: https://github.com/BlackBoneDel/EFFECT-HUD-/releases/tag/v1.1.0
