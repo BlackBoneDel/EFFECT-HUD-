@@ -9,9 +9,9 @@ verificación local se hizo con dos canales y hay que distinguirlos:
 - **[J] JUnit real en CI** — `./gradlew test` ejecuta la batería histórica
   (`EffectTimerBatteryTest` 20 + `BrandingAndAnchorsTest` 10) y las 9 clases
   nuevas de v1.2 (`PotionEffectRenameTest` 4, `IconPixelArtTest` 4,
-  `SideAnchorsTest` 6, `BorderRequiresBackgroundTest` 6, `CustomColorsToggleTest` 6,
+  `SideAnchorsTest` 6, `BorderRequiresBackgroundTest` 7, `CustomColorsToggleTest` 7,
   `VividColorsTest` 7, `TextShadowTest` 5, `OptionsOrderTest` 3,
-  `ConfigMigrationV3Test` 4): **76 tests**; Gradle aborta el build si falla
+  `ConfigMigrationV3Test` 4): **77 tests** (todos verdes en CI, run 45095231870); Gradle aborta el build si falla
   alguno. Estos son los únicos tests que viajan con el repo y corren contra el
   entorno oficial.
 - **[H] arnés local (harness-only)** — las clases puras (`config/`, `format/`,
