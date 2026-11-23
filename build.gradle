@@ -1,0 +1,79 @@
+plugins {
+	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
+
+loom {
+	splitEnvironmentSourceSets()
+
+	mods {
+		"effecttimer" {
+			sourceSet sourceSets.main
+			sourceSet sourceSets.client
+		}
+	}
+}
+
+repositories {
+	maven {
+		name = "Terraformers"
+		url = "https://maven.terraformersmc.com/releases/"
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings loom.officialMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	// Mod Menu: la integración es OPCIONAL (entrypoint solo se resuelve si el
+	// usuario tiene Mod Menu instalado). Igual que en el repo padre.
+	modClientImplementation("com.terraformersmc:modmenu:${project.modmenu_version}") {
+		exclude(group: "net.fabricmc.fabric-api")
+		exclude(group: "net.fabricmc", module: "fabric-loader")
+	}
+
+	testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
+}
+
+processResources {
+	def modVersion = project.version.toString()
+	inputs.property "version", modVersion
+
+	filesMatching("fabric.mod.json") {
+		expand "version": modVersion
+	}
+}
+
+test {
+	useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 21
+	it.options.encoding = "UTF-8"
+}
+
+java {
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
+
+jar {
+	def projectName = project.base.archivesName.get()
+	inputs.property "projectName", projectName
+
+	from("LICENSE") {
+		rename { "${it}_${projectName}" }
+	}
+}

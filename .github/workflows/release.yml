@@ -1,0 +1,79 @@
+name: Release
+
+# Se dispara al crear una etiqueta v* (p. ej. v1.0.0) o manualmente desde
+# Actions → Release → Run workflow.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the tagged commit
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x ./gradlew
+
+      - name: Compute release tag
+        id: vars
+        run: |
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            echo "tag=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
+          else
+            version=$(grep -E '^mod_version=' gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
+            echo "tag=v${version}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run the test battery
+        run: |
+          set +e
+          ./gradlew test --no-daemon --stacktrace > /tmp/gradle.log 2>&1
+          code=$?
+          set -e
+          if [ $code -ne 0 ]; then
+            summary=$(grep -E "error:|FAILED|Could not|What went wrong" -A1 /tmp/gradle.log | tail -n 30 | tr '\n' '|')
+            echo "::error::GRADLE_TEST_FAIL: ${summary}"
+          fi
+          test $code -eq 0
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: build/reports/tests/**
+          if-no-files-found: warn
+
+      - name: Build the mod jar
+        run: ./gradlew build --no-daemon
+
+      - name: Stage release artifacts (main jar; drop -sources/-dev)
+        run: |
+          mkdir -p dist
+          find build/libs -maxdepth 1 -type f -name 'potion-effect-*.jar' \
+            ! -name '*-sources.jar' ! -name '*-dev.jar' -exec cp -f {} dist/ \;
+          test -n "$(ls -A dist)" || { echo "ERROR: no .jar produced in build/libs"; ls -la build/libs; exit 1; }
+          ls -la build/libs/
+          ls -la dist/
+
+      - name: Publish GitHub Release with the .jar
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.tag }}
+          name: Potion Effect ${{ steps.vars.outputs.tag }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: dist/*.jar

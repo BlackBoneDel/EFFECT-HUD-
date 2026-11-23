@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "effecttimer",
+  "version": "${version}",
+  "name": "Potion Effect",
+  "description": "Standalone potion effects HUD with quick positions, vivid automatic colors, per-effect color overrides and a visual editor \u2014 by Denvdrite.",
+  "authors": [
+    "Denvdrite"
+  ],
+  "contact": {
+    "sources": "https://github.com/BlackBoneDel/EFFECT-HUD-"
+  },
+  "license": "MIT",
+  "icon": "assets/effecttimer/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.effecttimer.client.EffectTimerMod"
+    ],
+    "modmenu": [
+      "dev.effecttimer.client.compat.ModMenuIntegration"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.20.1",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
