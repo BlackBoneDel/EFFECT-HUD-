@@ -71,9 +71,14 @@ public final class SideAnchorsTest {
 			HudRect hr = HudLayoutEngine.resolveAnchorRect(HudAnchor.SIDE_LOW_RIGHT, 0, 0, w, h, 854, 480);
 			HudRect cr = HudLayoutEngine.resolveAnchorRect(HudAnchor.CENTER_RIGHT, 0, 0, w, h, 854, 480);
 			assertEquals(cr.x(), hr.x(), "margen derecho (6 px historico de CENTER_RIGHT) debe coincidir");
-			// módulo absurdamente ancho: sigue clampado dentro de pantalla
+			// módulo mayor que la pantalla (900×600 en 300×200): el motor, igual
+			// que en los CENTER_* desde la v1.1, clamp del ORIGEN a pantalla (no
+			// reescala); el recorte del sobrante lo hace el borde de la GUI.
 			HudRect huge = HudLayoutEngine.resolveAnchorRect(HudAnchor.SIDE_LOW_LEFT, 5000, -5000, 900, 600, 300, 200);
-			assertTrue(huge.x() >= 0 && huge.y() >= 0 && huge.right() <= 300 && huge.bottom() <= 200, huge.toString());
+			assertTrue(huge.x() >= 0 && huge.y() >= 0 && huge.x() < 300 && huge.y() < 200, huge.toString());
+			// y con un modulo que CABE, el clamp mantiene todo dentro de pantalla
+			HudRect fits = HudLayoutEngine.resolveAnchorRect(HudAnchor.SIDE_LOW_RIGHT, 9999, -9999, 120, 30, 300, 200);
+			assertTrue(fits.x() >= 0 && fits.right() <= 300 && fits.y() >= 0 && fits.bottom() <= 200, fits.toString());
 		}
 	}
 
