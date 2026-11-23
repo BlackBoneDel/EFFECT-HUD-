@@ -68,6 +68,27 @@ public final class AnchorQuickPicker {
 	}
 
 	/**
+	 * Variante en barra horizontal (editor visual, v1.2): los bounds quedan
+	 * fijados en la creacion (mojmap 1.21.11 no expone setBounds en botones).
+	 */
+	public static List<Button> buildRow(HudAnchor current, Consumer<HudAnchor> onPick,
+			Function<String, Component> tr, int startX, int y, int gap, int buttonWidth, int buttonHeight) {
+		List<Button> buttons = new ArrayList<>(GRID.length);
+		for (int i = 0; i < GRID.length; i++) {
+			Option option = GRID[i];
+			boolean active = current == option.anchor();
+			Component label = active
+					? Component.literal("\u00BB ").append(tr.apply(option.labelKey()))
+					: tr.apply(option.labelKey());
+			buttons.add(Button.builder(label, btn -> onPick.accept(option.anchor()))
+					.bounds(startX + i * (buttonWidth + gap), y, buttonWidth, buttonHeight)
+					.tooltip(Tooltip.create(tr.apply(option.anchor().tooltipKey())))
+					.build());
+		}
+		return buttons;
+	}
+
+	/**
 	 * Construye los 6 botones colocados en el grid (col = i % 2, row = i / 2).
 	 * {@code onPick} recibe el anclaje elegido; la llamada a rebuild/restart de
 	 * widgets corresponde a la pantalla contenedora.

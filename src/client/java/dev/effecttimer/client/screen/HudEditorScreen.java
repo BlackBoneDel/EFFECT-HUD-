@@ -179,7 +179,8 @@ public final class HudEditorScreen extends AbstractCustomizableScreen {
 		int row2Y = rowY + 24;
 		int qCount = AnchorQuickPicker.GRID.length;
 		int qW = Math.max(36, (innerW - gap * (qCount - 1)) / qCount);
-		java.util.List<net.minecraft.client.gui.components.Button> qBtns = AnchorQuickPicker.build(
+		// En el editor se muestran como barra horizontal (6 en una fila), no en 3x2.
+		for (net.minecraft.client.gui.components.Button qbtn : AnchorQuickPicker.buildRow(
 				effects().anchor,
 				anchor -> {
 					applyAnchor(anchor); // resetea offsets al salir de CUSTOM
@@ -187,15 +188,10 @@ public final class HudEditorScreen extends AbstractCustomizableScreen {
 				},
 				this::t,
 				panelX + PANEL_PAD,
-				gap,
 				row2Y,
-				3,
+				gap,
 				qW,
-				16);
-		// En el editor se muestran como barra horizontal (6 en una fila), no en 3x2.
-		for (int qi = 0; qi < qBtns.size(); qi++) {
-			net.minecraft.client.gui.components.Button qbtn = qBtns.get(qi);
-			qbtn.setBounds(panelX + PANEL_PAD + qi * (qW + gap), row2Y, qW, 16);
+				16)) {
 			addRenderableWidget(qbtn);
 		}
 
