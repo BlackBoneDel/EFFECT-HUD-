@@ -136,6 +136,28 @@ public final class CustomColorsToggleTest {
 	}
 
 	@Test
+	public void listRowVisualsAndGlobalControls() throws Exception {
+		// UI de bloque 5: casilla por fila (hit-test), muestra atenuada + tachado
+		// cuando el override esta pausado o el global esta OFF, y boton global
+		// TAMBIEN en «Configurar efectos» (spec 5.a).
+		Path screen = Path.of("src/client/java/dev/effecttimer/client/screen/EffectColorsScreen.java");
+		if (!java.nio.file.Files.exists(screen)) {
+			screen = Path.of("..", "src/client/java/dev/effecttimer/client/screen/EffectColorsScreen.java");
+		}
+		String src = java.nio.file.Files.readString(screen);
+		assertTrue(src.contains("ARGB.multiplyAlpha"), "muestra atenuada con global OFF");
+		assertTrue(src.contains("graphics.fill(sx, sy + 4, sx + 9, sy + 5"), "linea de tachado en fila pausada");
+		assertTrue(src.contains("rowToggleRect("), "hit-test de la casilla por fila");
+		assertTrue(src.contains("customColorsEnabled"), "el global vive en la pantalla");
+		Path cfg = Path.of("src/client/java/dev/effecttimer/client/screen/EffectsConfigScreen.java");
+		if (!java.nio.file.Files.exists(cfg)) {
+			cfg = Path.of("..", "src/client/java/dev/effecttimer/client/screen/EffectsConfigScreen.java");
+		}
+		assertTrue(java.nio.file.Files.readString(cfg).contains("effecttimer.effects.custom_colors"),
+				"el toggle global debe existir tambien en Configurar efectos");
+	}
+
+	@Test
 	public void rowToggleGeometryIsPureAndStable() {
 		int[] rect = dev.effecttimer.client.screen.EffectColorsScreen.rowToggleRect(100, 200, 40);
 		assertEquals(100 + 200 - 13 - 14, rect[0]);

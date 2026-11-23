@@ -93,6 +93,21 @@ public final class BorderRequiresBackgroundTest {
 	}
 
 	@Test
+	public void screenGatesBorderControlOnBackground() throws Exception {
+		// El control de «Borde de marco» debe quedar inactivo + tooltip
+		// «Requiere activar el fondo…» cuando el fondo esta apagado (spec 4.e).
+		Path screen = Path.of("src/client/java/dev/effecttimer/client/screen/EffectsConfigScreen.java");
+		if (!Files.exists(screen)) {
+			screen = Path.of("..", "src/client/java/dev/effecttimer/client/screen/EffectsConfigScreen.java");
+		}
+		String src = Files.readString(screen);
+		assertTrue(src.contains("borderBtn.active = EffectsFramePolicy.borderControlEnabled(effects.showEffectBackground);"),
+				"el boton de borde debe deshabilitarse segun la politica");
+		assertTrue(src.contains("borderBtn.setTooltip(Tooltip.create(t(\"effecttimer.tooltip.effects.border_requires_background\")));"),
+				"y ganar el tooltip especifico cuando esta gris");
+	}
+
+	@Test
 	public void presetsRemainConsistentWithRule() {
 		// "Vanilla compacto" = defaults (bg off, border on): con la regla nueva
 		// su marco deja de dibujarse (cambio de aspecto REPORTADO, no error).
