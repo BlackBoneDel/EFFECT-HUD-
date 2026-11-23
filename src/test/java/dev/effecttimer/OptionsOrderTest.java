@@ -43,10 +43,14 @@ public final class OptionsOrderTest {
 
 	@Test
 	public void quickGridHasSixButtonsAndEditorSharesIt() throws Exception {
-		assertEquals(6, dev.effecttimer.client.screen.AnchorQuickPicker.GRID.length);
+		int count = 0;
+		while (dev.effecttimer.client.screen.AnchorQuickPicker.anchorAt(count) != null) {
+			count++;
+		}
+		assertEquals(6, count, "grilla rapida de 6 botones (3x2)");
 		String editor = read("src/client/java/dev/effecttimer/client/screen/HudEditorScreen.java");
-		assertTrue(editor.contains("AnchorQuickPicker.build"),
-				"el editor visual (H) debe exponer el mismo selector 3x2");
+		assertTrue(editor.contains("AnchorQuickPicker.buildRow"),
+				"el editor visual (H) debe exponer la misma coleccion de 6 (barra)");
 	}
 
 	@Test
