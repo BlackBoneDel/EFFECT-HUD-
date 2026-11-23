@@ -1,5 +1,7 @@
 # Effect Timer — Effects HUD 100 % standalone (Fabric)
 
+*by Denvdrite*
+
 Port **completo del módulo "Effects HUD"** de [Hud Utils (HUD-MODS)](https://github.com/BlackBoneDel/HUD-MODS)
 a un mod **independiente**: la lógica del repo padre se portó tal cual (clases de
 config, formato, orden, colores, layout y pantallas) y se extirpó todo rastro de

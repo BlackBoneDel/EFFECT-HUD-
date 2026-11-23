@@ -1,6 +1,11 @@
 package dev.effecttimer.config;
 
 public enum HudAnchor {
+	// Anclajes junto a la barra rápida vanilla (izquierda/derecha del inventario de
+	// 9 huecos centrado). No tienen ninguna relación con armadura: solo usan la
+	// geometría fija de la hotbar (182 px centrados).
+	HOTBAR_LEFT("effecttimer.anchor.hotbar_left", "effecttimer.tooltip.anchor.hotbar_left"),
+	HOTBAR_RIGHT("effecttimer.anchor.hotbar_right", "effecttimer.tooltip.anchor.hotbar_right"),
 	CENTER_LEFT("effecttimer.anchor.center_left", "effecttimer.tooltip.anchor.center_left"),
 	CENTER_RIGHT("effecttimer.anchor.center_right", "effecttimer.tooltip.anchor.center_right"),
 	CENTER_BOTTOM("effecttimer.anchor.center_bottom", "effecttimer.tooltip.anchor.center_bottom"),

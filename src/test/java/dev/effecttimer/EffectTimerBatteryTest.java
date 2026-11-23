@@ -378,7 +378,7 @@ public final class EffectTimerBatteryTest {
 
 		assertTrue(HudLayoutEngine.hasAnyOverlap(List.of(new HudRect(0, 0, 10, 10), new HudRect(5, 5, 10, 10))));
 		assertFalse(HudLayoutEngine.hasAnyOverlap(List.of(new HudRect(0, 0, 10, 10), new HudRect(20, 20, 10, 10))));
-		assertEquals(8, HudAnchor.values().length);
+		assertEquals(10, HudAnchor.values().length, "9 predefinidos + CUSTOM");
 	}
 
 	@Test

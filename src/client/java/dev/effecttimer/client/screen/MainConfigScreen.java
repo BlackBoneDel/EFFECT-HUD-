@@ -185,6 +185,12 @@ public final class MainConfigScreen extends AbstractScrollableConfigScreen {
 				y
 		);
 
+		// Branding: crédito al pie de la pantalla principal (misma clave en EN/ES).
+		Component credit = t("effecttimer.screen.main.credit");
+		int creditW = this.font.width(credit);
+		addInfoNote(credit, leftX + Math.max(0, (panelW - creditW) / 2), y + 6);
+		y += 14;
+
 		syncScrollPositions();
 
 		int footerY = this.height - FOOTER_HEIGHT + 7;

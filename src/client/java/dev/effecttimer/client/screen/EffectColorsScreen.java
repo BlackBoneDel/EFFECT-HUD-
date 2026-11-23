@@ -125,11 +125,8 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 
 	private void applyFilter() {
 		filteredEntries.clear();
-		String q = searchText == null ? "" : searchText.trim().toLowerCase(Locale.ROOT);
 		for (EffectEntry entry : allEntries) {
-			if (q.isEmpty()
-					|| entry.displayName().toLowerCase(Locale.ROOT).contains(q)
-					|| entry.id().toLowerCase(Locale.ROOT).contains(q)) {
+			if (dev.effecttimer.format.EffectSearchFilter.matches(entry.displayName(), entry.id(), searchText)) {
 				filteredEntries.add(entry);
 			}
 		}
