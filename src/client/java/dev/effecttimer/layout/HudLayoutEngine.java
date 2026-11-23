@@ -61,7 +61,7 @@ public final class HudLayoutEngine {
 				baseY = screenHeight / 4 - scaledHeight / 2;
 			}
 			case SIDE_HIGH_RIGHT -> {
-				baseX = screenWidth - scaledWidth - 8;
+				baseX = screenWidth - scaledWidth - 6;
 				baseY = screenHeight / 4 - scaledHeight / 2;
 			}
 			case SIDE_LOW_LEFT -> {
@@ -69,7 +69,7 @@ public final class HudLayoutEngine {
 				baseY = screenHeight * 3 / 4 - scaledHeight / 2;
 			}
 			case SIDE_LOW_RIGHT -> {
-				baseX = screenWidth - scaledWidth - 8;
+				baseX = screenWidth - scaledWidth - 6;
 				baseY = screenHeight * 3 / 4 - scaledHeight / 2;
 			}
 			case HOTBAR_LEFT -> {

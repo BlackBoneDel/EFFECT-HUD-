@@ -183,10 +183,10 @@ public final class EffectTimerBatteryTest {
 		assertEquals(HudAnchor.CUSTOM, target.effects.anchor);
 		assertEquals(100, target.effects.offsetX);
 		assertEquals(50, target.effects.offsetY);
-		assertEquals(2, target.configVersion);
+		assertEquals(3, target.configVersion);
 
 		HudConfig modern = new HudConfig();
-		assertFalse(ConfigMigrator.migrate(JsonParser.parseString("{\"configVersion\":2}").getAsJsonObject(), modern));
+		assertFalse(ConfigMigrator.migrate(JsonParser.parseString("{\"configVersion\":3}").getAsJsonObject(), modern));
 	}
 
 	// ---------- §35 presets ----------

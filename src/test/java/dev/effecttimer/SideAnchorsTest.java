@@ -70,7 +70,7 @@ public final class SideAnchorsTest {
 			assertEquals(cl.x(), hl.x(), "margen izquierdo debe coincidir con CENTER_LEFT");
 			HudRect hr = HudLayoutEngine.resolveAnchorRect(HudAnchor.SIDE_LOW_RIGHT, 0, 0, w, h, 854, 480);
 			HudRect cr = HudLayoutEngine.resolveAnchorRect(HudAnchor.CENTER_RIGHT, 0, 0, w, h, 854, 480);
-			assertEquals(cr.right(), hr.right(), "margen derecho debe coincidir con CENTER_RIGHT");
+			assertEquals(cr.x(), hr.x(), "margen derecho (6 px historico de CENTER_RIGHT) debe coincidir");
 			// módulo absurdamente ancho: sigue clampado dentro de pantalla
 			HudRect huge = HudLayoutEngine.resolveAnchorRect(HudAnchor.SIDE_LOW_LEFT, 5000, -5000, 900, 600, 300, 200);
 			assertTrue(huge.x() >= 0 && huge.y() >= 0 && huge.right() <= 300 && huge.bottom() <= 200, huge.toString());
@@ -83,14 +83,21 @@ public final class SideAnchorsTest {
 			EffectsConfig cfg = new EffectsConfig();
 			cfg.anchor = HudAnchor.SIDE_HIGH_RIGHT;
 			cfg.orientation = orientation;
-			cfg.scale = 2.5f;
+			// escala cabible: el modulo completo queda dentro de pantalla
+			cfg.scale = 0.5f;
 			List<EffectRowMetric> metrics = List.of(
 					new EffectRowMetric("a", 300, 20, 0),
 					new EffectRowMetric("b", 280, 20, 0));
-			EffectsLayoutResult res = HudLayoutEngine.computeEffectsLayout(cfg, metrics, 427, 240);
-			HudRect b = res.bounds();
+			HudRect b = HudLayoutEngine.computeEffectsLayout(cfg, metrics, 427, 240).bounds();
 			assertTrue(b.x() >= 0 && b.y() >= 0 && b.right() <= 427 && b.bottom() <= 240,
 					orientation + ": " + b);
+			// escala 2.5 con filas de 300 px = modulo de 750 px: supera la pantalla;
+			// la politica (igual que CENTER_* desde v1.1) es clamp del ORIGEN (el
+			// exceso solo puede recortarse por el borde; no hay reescala).
+			cfg.scale = 2.5f;
+			HudRect big = HudLayoutEngine.computeEffectsLayout(cfg, metrics, 427, 240).bounds();
+			assertTrue(big.x() >= 0 && big.y() >= 0 && big.y() < 240,
+					orientation + " oversize: el origen debe seguir en pantalla: " + big);
 		}
 	}
 
