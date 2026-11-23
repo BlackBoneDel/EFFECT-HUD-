@@ -70,7 +70,7 @@ public final class SideAnchorsTest {
 			assertEquals(cl.x(), hl.x(), "margen izquierdo debe coincidir con CENTER_LEFT");
 			HudRect hr = HudLayoutEngine.resolveAnchorRect(HudAnchor.SIDE_LOW_RIGHT, 0, 0, w, h, 854, 480);
 			HudRect cr = HudLayoutEngine.resolveAnchorRect(HudAnchor.CENTER_RIGHT, 0, 0, w, h, 854, 480);
-			assertEquals(cr.x(), hr.x(), "margen derecho (6 px historico de CENTER_RIGHT) debe coincidir");
+			assertEquals(cr.x(), hr.x(), "margen derecho debe coincidir con CENTER_RIGHT (8 px)");
 			// módulo mayor que la pantalla (900×600 en 300×200): el motor, igual
 			// que en los CENTER_* desde la v1.1, clamp del ORIGEN a pantalla (no
 			// reescala); el recorte del sobrante lo hace el borde de la GUI.
