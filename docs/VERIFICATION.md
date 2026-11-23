@@ -83,4 +83,4 @@ de hotbar en pantalla. Nada de esto es testeable sin lanzar Minecraft.
 ## Resultado de la pipeline
 
 - v1.1.0 (base): run https://github.com/BlackBoneDel/EFFECT-HUD-/actions/runs/45087544670 — completed success; release https://github.com/BlackBoneDel/EFFECT-HUD-/releases/tag/v1.1.0
-- v1.1.1: la run de la etiqueta `v1.1.1` (test → build → publish) y su enlace se publican en cuanto CI termine; la release https://github.com/BlackBoneDel/EFFECT-HUD-/releases/tag/v1.1.1 incluye el jar `effect-timer-1.1.1.jar`.
+- v1.1.1: run https://github.com/BlackBoneDel/EFFECT-HUD-/actions/runs/45089986473 — **completed success** (13 steps verdes, incluida «Run the test battery» con los 30 tests JUnit) y release https://github.com/BlackBoneDel/EFFECT-HUD-/releases/tag/v1.1.1 con el jar `effect-timer-1.1.1.jar` (174 733 B).
