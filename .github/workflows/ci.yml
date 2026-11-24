@@ -65,73 +65,113 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v5
 
+      - name: Check out the v1.2.0 tag for the reference build
+        uses: actions/checkout@v5
+        with:
+          ref: v1.2.0
+          path: reference
+
       - name: Set up JDK 21 (Temurin)
         uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Download the mod jar built in this run
+      - name: Build the v1.2.0 tag in this environment
+        working-directory: reference
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build --no-daemon
+
+      - name: Download the mod jar built from main in this run
         uses: actions/download-artifact@v4
         with:
           name: mod-jar
           path: built
 
-      - name: Download the published v1.2.0 jar
+      - name: Download the published v1.2.0 jar (informative)
+        continue-on-error: true
         run: |
           curl -fsSL -o published.jar \
             https://github.com/BlackBoneDel/EFFECT-HUD-/releases/download/v1.2.0/potion-effect-1.2.0.jar
 
       - name: Compare jars
         run: |
-          set -u
-          export LC_ALL=C
-          NEW=$(ls built/potion-effect-*.jar | head -n 1)
-          OLD=published.jar
-          mkdir -p parity/old parity/new
-          unzip -q -o "$OLD" -d parity/old
-          unzip -q -o "$NEW" -d parity/new
+          python3 - <<'PY'
+          import glob, hashlib, os, subprocess, tempfile, zipfile, difflib
 
-          echo "::group::Jar entry list"
-          diff <(unzip -Z1 "$OLD" | sort) <(unzip -Z1 "$NEW" | sort) && echo "Entry lists identical" || echo "Entry lists DIFFER"
-          echo "::endgroup::"
+          def jar_of(pattern):
+              hits = [p for p in glob.glob(pattern) if not p.endswith(('-sources.jar', '-dev.jar'))]
+              return hits[0] if hits else None
 
-          echo "::group::fabric.mod.json"
-          if diff parity/old/fabric.mod.json parity/new/fabric.mod.json; then
-            echo "fabric.mod.json identical"
-          else
-            echo "fabric.mod.json DIFFERS"
-          fi
-          echo "::endgroup::"
+          def extract(jar):
+              d = tempfile.mkdtemp()
+              zipfile.ZipFile(jar).extractall(d)
+              return d
 
-          echo "::group::Bytecode (javap -c -p -constants, no line numbers)"
-          : > parity/class-diffs.txt
-          cd parity/old
-          find . -name '*.class' | sort > ../classes.txt
-          cd ../..
-          while read -r c; do
-            if [ ! -f "parity/new/$c" ]; then
-              echo "$c" >> parity/class-diffs.txt
-              continue
-            fi
-            if ! diff <(javap -c -p -constants "parity/old/$c") <(javap -c -p -constants "parity/new/$c") > /dev/null; then
-              echo "$c" >> parity/class-diffs.txt
-            fi
-          done < parity/classes.txt
-          (cd parity/new && find . -name '*.class' | sort) > parity/new-classes.txt
-          comm -13 parity/classes.txt parity/new-classes.txt >> parity/class-diffs.txt || true
-          echo "::endgroup::"
+          def notice(title, msg):
+              print(f'::notice title={title}::{msg}')
 
-          echo "::group::Non-class files (sha256)"
-          (cd parity/old && find . -type f ! -name '*.class' | sort | xargs -r sha256sum) > parity/old.sha
-          (cd parity/new && find . -type f ! -name '*.class' | sort | xargs -r sha256sum) > parity/new.sha
-          diff parity/old.sha parity/new.sha > parity/nonclass-diff.txt || true
-          NONCLASS=$(awk '{print $NF}' parity/nonclass-diff.txt | grep '^\./' | sort -u | tr '\n' ' ')
-          echo "non-class differing files: ${NONCLASS:-none}"
-          echo "::endgroup::"
+          def javap(path):
+              return subprocess.run(['javap', '-c', '-p', '-constants', path],
+                                    capture_output=True, text=True, check=True).stdout
 
-          CLASS_COUNT=$(wc -l < parity/class-diffs.txt | tr -d ' ')
-          CLASS_LIST=$(paste -sd ' ' parity/class-diffs.txt)
-          NONCLASS_COUNT=$(echo "$NONCLASS" | wc -w | tr -d ' ')
-          echo "::notice title=Parity::${CLASS_COUNT} clases con diferencias de bytecode: [${CLASS_LIST}]"
-          echo "::notice title=Parity::${NONCLASS_COUNT} archivos no-class distintos: [${NONCLASS}]"
+          def sha(path):
+              with open(path, 'rb') as f:
+                  return hashlib.sha256(f.read()).hexdigest()
+
+          def compare(label, a_jar, b_jar):
+              a_dir, b_dir = extract(a_jar), extract(b_jar)
+              a_names = set(zipfile.ZipFile(a_jar).namelist())
+              b_names = set(zipfile.ZipFile(b_jar).namelist())
+              entries_ok = a_names == b_names
+              only_a = sorted(a_names - b_names)
+              only_b = sorted(b_names - a_names)
+              mod_json_ok = open(os.path.join(a_dir, 'fabric.mod.json'), 'rb').read() == \
+                  open(os.path.join(b_dir, 'fabric.mod.json'), 'rb').read()
+
+              classes = sorted(n for n in a_names | b_names if n.endswith('.class'))
+              class_diffs, samples = [], []
+              for c in classes:
+                  pa, pb = os.path.join(a_dir, c), os.path.join(b_dir, c)
+                  if not (os.path.exists(pa) and os.path.exists(pb)):
+                      class_diffs.append(c + ' (missing on one side)')
+                      continue
+                  ja, jb = javap(pa), javap(pb)
+                  if ja != jb:
+                      class_diffs.append(c)
+                      if len(samples) < 3:
+                          d = list(difflib.unified_diff(ja.splitlines(), jb.splitlines(), lineterm='', n=0))
+                          samples.append(c + ': ' + ' | '.join(d[2:8]))
+
+              nonclass = sorted(n for n in a_names | b_names
+                                if not n.endswith('.class') and not n.endswith('/'))
+              nonclass_diffs = []
+              for n in nonclass:
+                  pa, pb = os.path.join(a_dir, n), os.path.join(b_dir, n)
+                  if not (os.path.exists(pa) and os.path.exists(pb)) or sha(pa) != sha(pb):
+                      nonclass_diffs.append(n)
+
+              print(f'== {label} ==')
+              print(f'entries identical: {entries_ok}; only in reference: {only_a}; only in built: {only_b}')
+              print(f'fabric.mod.json identical: {mod_json_ok}')
+              print(f'{len(class_diffs)} clases con diferencias de bytecode: {class_diffs}')
+              for smp in samples:
+                  print('  sample ' + smp[:600])
+              print(f'{len(nonclass_diffs)} archivos no-class distintos: {nonclass_diffs}')
+              notice(f'Parity {label}', f'entries={entries_ok} mod_json={mod_json_ok} '
+                     f'classes_diff={len(class_diffs)} nonclass_diff={len(nonclass_diffs)}')
+              notice(f'Parity {label} classes', f'{len(class_diffs)} clases con diferencias de bytecode: '
+                     + ' '.join(class_diffs)[:3000])
+              notice(f'Parity {label} nonclass', f'{len(nonclass_diffs)} archivos no-class distintos: '
+                     + ' '.join(nonclass_diffs)[:3000])
+              for smp in samples:
+                  notice(f'Parity {label} sample', smp[:900])
+
+          built = jar_of('built/potion-effect-*.jar')
+          reference = jar_of('reference/build/libs/potion-effect-*.jar')
+          print('built:', built, 'reference:', reference)
+          compare('reference-rebuild', reference, built)
+          if os.path.exists('published.jar'):
+              compare('published-v1.2.0', 'published.jar', built)
+          PY
