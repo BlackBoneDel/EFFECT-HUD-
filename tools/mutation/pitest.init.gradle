@@ -12,7 +12,7 @@ initscript {
 }
 
 allprojects {
-    apply plugin: 'info.solidsoft.pitest'
+    apply plugin: info.solidsoft.gradle.pitest.PitestPlugin
 
     pitest {
         pitestVersion = '1.15.0'
