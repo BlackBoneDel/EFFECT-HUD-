@@ -11,33 +11,39 @@ initscript {
     }
 }
 
-allprojects {
-    apply plugin: info.solidsoft.gradle.pitest.PitestPlugin
+allprojects { Project p ->
+    p.apply plugin: info.solidsoft.gradle.pitest.PitestPlugin
 
-    pitest {
-        pitestVersion = '1.15.0'
-        junit5PluginVersion = '1.2.1'
-        threads = 2
-        timeoutFactor = 1.25
-        timeoutConstant = 4000
-        outputFormats = ['HTML', 'XML']
-        timestampedReports = false
-        verbose = false
+    p.extensions.configure(info.solidsoft.gradle.pitest.PitestPluginExtension) { ext ->
+        ext.pitestVersion = '1.15.0'
+        ext.junit5PluginVersion = '1.2.1'
+        ext.threads = 2
+        ext.timeoutFactor = 1.25
+        ext.timeoutConstant = 4000
+        ext.outputFormats = ['HTML', 'XML']
+        ext.timestampedReports = false
+        ext.verbose = false
         // Pure logic only: formatting, config, layout and color helpers.
-        targetClasses = [
+        ext.targetClasses = [
             'dev.effecttimer.format.*',
             'dev.effecttimer.config.*',
             'dev.effecttimer.layout.*'
         ]
-        targetTests = ['dev.effecttimer.*']
+        ext.targetTests = ['dev.effecttimer.*']
     }
 
-    afterEvaluate { p ->
-        if (p.extensions.findByName('sourceSets') != null && p.extensions.findByName('loom') != null) {
-            def clientSet = p.sourceSets.findByName('client')
-            if (clientSet != null) {
-                p.pitest.mutableCodePaths.from(clientSet.output.classesDirs)
-            }
+    p.afterEvaluate { Project q ->
+        def clientSet = q.extensions.findByName('sourceSets') ? q.sourceSets.findByName('client') : null
+        if (clientSet == null) {
+            return
+        }
+        def ext = q.extensions.getByType(info.solidsoft.gradle.pitest.PitestPluginExtension)
+        def extra = clientSet.output.classesDirs
+        def current = ext.mutableCodePaths
+        if (current instanceof org.gradle.api.file.ConfigurableFileCollection) {
+            current.from(extra)
+        } else {
+            ext.mutableCodePaths = q.files(current, extra)
         }
     }
 }
