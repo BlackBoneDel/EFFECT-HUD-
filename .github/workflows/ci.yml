@@ -25,8 +25,8 @@ jobs:
       - name: Grant execute permission to gradlew
         run: chmod +x ./gradlew
 
-      - name: Run tests and build
-        run: ./gradlew test build --no-daemon
+      - name: Run tests and build the remapped mod jar
+        run: ./gradlew test remapJar --no-daemon
 
       - name: Count executed tests
         if: always()
@@ -51,11 +51,15 @@ jobs:
           path: build/test-results/test/*.xml
           if-no-files-found: warn
 
-      - name: Upload mod jar
+      - name: Upload temporary mod JAR (30 days)
         uses: actions/upload-artifact@v4
         with:
-          name: mod-jar
-          path: build/libs/potion-effect-*.jar
+          name: effect-hud-pr2-build
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+            !build/libs/*-dev.jar
+          retention-days: 30
           if-no-files-found: error
 
   mutation:
