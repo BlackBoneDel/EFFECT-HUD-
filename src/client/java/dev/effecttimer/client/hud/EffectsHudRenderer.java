@@ -333,7 +333,6 @@ public final class EffectsHudRenderer {
 				}
 			}
 			case POTION_HUD -> {
-				// handled above
 			}
 		}
 

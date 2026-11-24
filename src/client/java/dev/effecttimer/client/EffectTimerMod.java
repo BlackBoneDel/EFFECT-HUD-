@@ -167,13 +167,10 @@ public final class EffectTimerMod implements ClientModInitializer {
 
 	private static void drainClicks() {
 		while (openConfigKey.consumeClick()) {
-			// drained
 		}
 		while (openEditorKey.consumeClick()) {
-			// drained
 		}
 		while (toggleEffectsKey.consumeClick()) {
-			// drained
 		}
 	}
 }
