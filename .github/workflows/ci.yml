@@ -1,0 +1,137 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x ./gradlew
+
+      - name: Run tests and build
+        run: ./gradlew test build --no-daemon
+
+      - name: Count executed tests
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import glob, xml.etree.ElementTree as ET
+          total = failures = errors = skipped = 0
+          for path in glob.glob('build/test-results/test/*.xml'):
+              suite = ET.parse(path).getroot()
+              total += int(suite.get('tests', 0))
+              failures += int(suite.get('failures', 0))
+              errors += int(suite.get('errors', 0))
+              skipped += int(suite.get('skipped', 0))
+          print(f'Tests executed: {total} (failures={failures}, errors={errors}, skipped={skipped})')
+          PY
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: build/test-results/test/*.xml
+          if-no-files-found: warn
+
+      - name: Upload mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-jar
+          path: build/libs/potion-effect-*.jar
+          if-no-files-found: error
+
+  parity:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Download the mod jar built in this run
+        uses: actions/download-artifact@v4
+        with:
+          name: mod-jar
+          path: built
+
+      - name: Download the published v1.2.0 jar
+        run: |
+          curl -fsSL -o published.jar \
+            https://github.com/BlackBoneDel/EFFECT-HUD-/releases/download/v1.2.0/potion-effect-1.2.0.jar
+
+      - name: Compare jars
+        run: |
+          set -u
+          export LC_ALL=C
+          NEW=$(ls built/potion-effect-*.jar | head -n 1)
+          OLD=published.jar
+          mkdir -p parity/old parity/new
+          unzip -q -o "$OLD" -d parity/old
+          unzip -q -o "$NEW" -d parity/new
+
+          echo "::group::Jar entry list"
+          diff <(unzip -Z1 "$OLD" | sort) <(unzip -Z1 "$NEW" | sort) && echo "Entry lists identical" || echo "Entry lists DIFFER"
+          echo "::endgroup::"
+
+          echo "::group::fabric.mod.json"
+          if diff parity/old/fabric.mod.json parity/new/fabric.mod.json; then
+            echo "fabric.mod.json identical"
+          else
+            echo "fabric.mod.json DIFFERS"
+          fi
+          echo "::endgroup::"
+
+          echo "::group::Bytecode (javap -c -p -constants, no line numbers)"
+          : > parity/class-diffs.txt
+          cd parity/old
+          find . -name '*.class' | sort > ../classes.txt
+          cd ../..
+          while read -r c; do
+            if [ ! -f "parity/new/$c" ]; then
+              echo "$c" >> parity/class-diffs.txt
+              continue
+            fi
+            if ! diff <(javap -c -p -constants "parity/old/$c") <(javap -c -p -constants "parity/new/$c") > /dev/null; then
+              echo "$c" >> parity/class-diffs.txt
+            fi
+          done < parity/classes.txt
+          (cd parity/new && find . -name '*.class' | sort) > parity/new-classes.txt
+          comm -13 parity/classes.txt parity/new-classes.txt >> parity/class-diffs.txt || true
+          echo "::endgroup::"
+
+          echo "::group::Non-class files (sha256)"
+          (cd parity/old && find . -type f ! -name '*.class' | sort | xargs -r sha256sum) > parity/old.sha
+          (cd parity/new && find . -type f ! -name '*.class' | sort | xargs -r sha256sum) > parity/new.sha
+          diff parity/old.sha parity/new.sha > parity/nonclass-diff.txt || true
+          NONCLASS=$(awk '{print $NF}' parity/nonclass-diff.txt | grep '^\./' | sort -u | tr '\n' ' ')
+          echo "non-class differing files: ${NONCLASS:-none}"
+          echo "::endgroup::"
+
+          CLASS_COUNT=$(wc -l < parity/class-diffs.txt | tr -d ' ')
+          CLASS_LIST=$(paste -sd ' ' parity/class-diffs.txt)
+          NONCLASS_COUNT=$(echo "$NONCLASS" | wc -w | tr -d ' ')
+          echo "${CLASS_COUNT} clases con diferencias de bytecode: [${CLASS_LIST}]"
+          echo "${NONCLASS_COUNT} archivos no-class distintos: [${NONCLASS}]"
