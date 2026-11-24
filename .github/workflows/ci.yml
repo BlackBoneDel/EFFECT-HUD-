@@ -175,3 +175,63 @@ jobs:
           if os.path.exists('published.jar'):
               compare('published-v1.2.0', 'published.jar', built)
           PY
+
+  mutation:
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x ./gradlew
+
+      - name: Run PIT
+        run: ./gradlew pitest -I tools/mutation/pitest.init.gradle --no-daemon
+
+      - name: Summarize mutation results per package
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import collections, glob, xml.etree.ElementTree as ET
+          files = glob.glob('build/reports/pitest/**/mutations.xml', recursive=True)
+          if not files:
+              print('::notice title=PIT::no mutations.xml found')
+          for path in files:
+              stats = collections.defaultdict(lambda: collections.Counter())
+              for m in ET.parse(path).getroot().iter('mutation'):
+                  cls = m.findtext('mutatedClass') or ''
+                  pkg = cls.rsplit('.', 1)[0] if '.' in cls else cls
+                  status = m.get('status', 'UNKNOWN')
+                  stats[pkg]['total'] += 1
+                  stats[pkg][status] += 1
+              total = collections.Counter()
+              for pkg in sorted(stats):
+                  c = stats[pkg]
+                  total.update(c)
+                  killed = c['KILLED']
+                  score = 100.0 * killed / c['total'] if c['total'] else 0.0
+                  line = (f"{pkg}: score={score:.1f}% total={c['total']} killed={killed} "
+                          f"survived={c['SURVIVED']} no_coverage={c['NO_COVERAGE']} timed_out={c['TIMED_OUT']}")
+                  print(line)
+                  print(f"::notice title=PIT {pkg}::{line}")
+              t = total['total']
+              overall = 100.0 * total['KILLED'] / t if t else 0.0
+              print(f"OVERALL: score={overall:.1f}% total={t} killed={total['KILLED']} survived={total['SURVIVED']}")
+              print(f"::notice title=PIT overall::score={overall:.1f}% total={t} killed={total['KILLED']} survived={total['SURVIVED']}")
+          PY
+
+      - name: Upload PIT reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pitest-report
+          path: build/reports/pitest
+          if-no-files-found: warn

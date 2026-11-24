@@ -1,0 +1,43 @@
+// Mutation testing setup, applied only with:
+//   ./gradlew pitest -I tools/mutation/pitest.init.gradle
+// The normal build (build, test) never loads this file.
+
+initscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.15.0'
+    }
+}
+
+allprojects {
+    apply plugin: info.solidsoft.gradle.pitest.PitPlugin
+
+    pitest {
+        pitestVersion = '1.15.0'
+        junit5PluginVersion = '1.2.1'
+        threads = 2
+        timeoutFactor = 1.25
+        timeoutConstant = 4000
+        outputFormats = ['HTML', 'XML']
+        timestampedReports = false
+        verbose = false
+        // Pure logic only: formatting, config, layout and color helpers.
+        targetClasses = [
+            'dev.effecttimer.format.*',
+            'dev.effecttimer.config.*',
+            'dev.effecttimer.layout.*'
+        ]
+        targetTests = ['dev.effecttimer.*']
+    }
+
+    afterEvaluate { p ->
+        if (p.extensions.findByName('sourceSets') != null && p.extensions.findByName('loom') != null) {
+            def clientSet = p.sourceSets.findByName('client')
+            if (clientSet != null) {
+                p.pitest.mutableCodePaths.from(clientSet.output.classesDirs)
+            }
+        }
+    }
+}
