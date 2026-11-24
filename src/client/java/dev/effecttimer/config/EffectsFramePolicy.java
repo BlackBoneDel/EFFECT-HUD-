@@ -1,13 +1,10 @@
 package dev.effecttimer.config;
 
 /**
- * Regla de marco v1.2 («sin fondo = sin marco»): sustituye a la antigua
- * "borde independiente del fondo". El marco (outline de fila, bordes de las
- * fichas PotionHUD normal/mini y cualquier adorno de encuadre) solo se dibuja
- * si AMBOS interruptores están activados. El valor de {@code showEffectBorder}
- * se conserva guardado aunque el fondo esté apagado: al reactivar el fondo el
- * borde reaparece. El acento lateral de CLEAN_CARD es decorativo y NO es
- * marco: se dibuja siempre.
+ * Sin fondo no hay marco. El marco (outline de fila, bordes de las fichas PotionHUD
+ * y cualquier encuadre) solo se dibuja si AMBOS interruptores están activados.
+ * {@code showEffectBorder} se conserva aunque el fondo esté apagado. El acento
+ * lateral de CLEAN_CARD es decorativo y no es marco: se dibuja siempre.
  */
 public final class EffectsFramePolicy {
 	private EffectsFramePolicy() {

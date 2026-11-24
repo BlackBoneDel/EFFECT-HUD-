@@ -20,8 +20,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
 /**
- * Editor visual del HUD de efectos (portado de {@code HudEditorScreen} del repo
- * padre, sin el bloque de armadura ni la selección de módulo). Permite:
+ * Editor visual del HUD de efectos. Permite:
  * <ul>
  *   <li>arrastrar el HUD para reposicionarlo: al moverlo, el anclaje pasa
  *       automáticamente a {@code CUSTOM} conservando la posición visual;</li>
@@ -174,7 +173,7 @@ public final class HudEditorScreen extends AbstractCustomizableScreen {
 				.tooltip(Tooltip.create(t("effecttimer.tooltip.editor.cancel"))).build();
 		addRenderableWidget(cancelBtn);
 
-		// v1.2, bloque 3: el mismo selector 3x2 vive en la barra del editor como
+		// El mismo selector vive en la barra del editor como
 		// segunda fila de mini-botones.
 		int row2Y = rowY + 24;
 		int qCount = AnchorQuickPicker.GRID.length;

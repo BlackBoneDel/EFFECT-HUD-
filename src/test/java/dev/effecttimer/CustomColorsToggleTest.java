@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Bloque 5 (v1.2): interruptor global {@code customColorsEnabled} (default ON)
+ * interruptor global {@code customColorsEnabled} (default ON)
  * y toggle por efecto. Con el global en OFF ningún override se aplica (nombre,
  * temporizador y acento vuelven a la cadena normal), pero TODOS los hex y los
  * toggles individuales quedan guardados y vuelven al reactivar.
@@ -137,9 +137,9 @@ public final class CustomColorsToggleTest {
 
 	@Test
 	public void listRowVisualsAndGlobalControls() throws Exception {
-		// UI de bloque 5: casilla por fila (hit-test), muestra atenuada + tachado
+		// UI de casilla por fila (hit-test), muestra atenuada + tachado
 		// cuando el override esta pausado o el global esta OFF, y boton global
-		// TAMBIEN en «Configurar efectos» (spec 5.a).
+		// TAMBIEN en «Configurar efectos».
 		Path screen = Path.of("src/client/java/dev/effecttimer/client/screen/EffectColorsScreen.java");
 		if (!java.nio.file.Files.exists(screen)) {
 			screen = Path.of("..", "src/client/java/dev/effecttimer/client/screen/EffectColorsScreen.java");

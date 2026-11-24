@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 /**
- * Cadena de prioridad de color (v1.2): override personalizado del efecto (solo
+ * Prioridad de color: override personalizado del efecto (solo
  * si {@code customColorsEnabled}) &gt; color por tiempo restante (si
  * {@code colorDurationByRemaining}) &gt; color automático vívido. El color
  * automático pasa por {@link #vividize(int)}: satura y sube el valor del color
@@ -21,7 +21,7 @@ public final class EffectsColorResolver {
 	public static final int UNREADABLE_FALLBACK_RGB = 0xE6EDF3;
 	public static final float MIN_READABLE_LUMINANCE = 0.34f;
 	public static final float TARGET_READABLE_LUMINANCE = 0.44f;
-	/** Suelo de luminancia relativa v1.2 sobre fondo oscuro. */
+	/** Suelo de luminancia relativa sobre fondo oscuro. */
 	public static final float VIVID_MIN_LUMINANCE = 0.35f;
 	public static final float VIVID_MIN_SATURATION = 0.70f;
 	public static final float VIVID_MIN_VALUE = 0.95f;
@@ -87,10 +87,10 @@ public final class EffectsColorResolver {
 	}
 
 	/**
-	 * Color automático vívido (v1.2, bloque 6). Paso base (idempotente por
+	 * Color automático vívido. Paso base (idempotente por
 	 * construcción: cada canal se ancla a constantes fijas, sin deriva
 	 * multiplicativa): cromático (S ≥ 0.12) → S = max(S, 0.70) con el impulso
-	 * del spec S×1.25 cuando aún no llega al suelo; V = max(V, 0.95). Casi gris
+	 * S×1.25 cuando aún no llega al suelo; V = max(V, 0.95). Casi gris
 	 * (S < 0.12): no se le inventa tono, solo V = max(V, 0.92).
 	 * Garantía de legibilidad: la luminancia objetivo es max(0.35, min(lum de
 	 * entrada, 0.92)) — es decir NUNCA por debajo de la del color de entrada
@@ -149,9 +149,8 @@ public final class EffectsColorResolver {
 		if (rgb == 0) {
 			return UNREADABLE_FALLBACK_RGB;
 		}
-		// v1.2: el vívido ES la nueva regla de legibilidad (superconjunto de la
-		// antigua de «aclarar oscuros»: V ≥ 0.92-0.95 garantiza más luminancia
-		// que el blend anterior en todos los casos testeables).
+		// El vívido ya garantiza la legibilidad: supera a la antigua regla de aclarar
+		// oscuros (V ≥ 0.92-0.95 da más luminancia que el blend anterior).
 		return vividize(rgb);
 	}
 
@@ -159,7 +158,7 @@ public final class EffectsColorResolver {
 		if (effectId == null || config == null || config.customEffectColors == null) {
 			return OptionalInt.empty();
 		}
-		// v1.2: interruptor global. En OFF ningún override se aplica, pero los
+		// Con el interruptor global apagado ningún override se aplica, pero los
 		// datos (hex + enabled por efecto) siguen intactos en el config.
 		if (!config.customColorsEnabled) {
 			return OptionalInt.empty();

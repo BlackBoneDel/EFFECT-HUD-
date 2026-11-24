@@ -3,9 +3,9 @@ package dev.effecttimer.config;
 import com.google.gson.JsonObject;
 
 /**
- * Migraciones JSON de una sola vez de Potion Effect (standalone).
+ * Migraciones JSON de una sola vez de Potion Effect.
  *
- * <p>Regla principal (spec v1.1, punto 38): si existe un config plano heredado
+ * <p>Regla principal: si existe un config plano heredado
  * de v1.0.0 (claves {@code enabled, posX, posY, scale, orientation, showIcons,
  * showDuration, showName, blinkOnExpire, textColor} sin {@code configVersion}),
  * se traslada lo equivalente al nuevo esquema anidado {@code effects} y se
@@ -18,9 +18,8 @@ import com.google.gson.JsonObject;
  *   <li>{@code posX/posY → anchor=CUSTOM + offsetX/offsetY}</li>
  * </ul>
  *
- * <p>El mecanismo (detección por versión ausente, mutación del target y flag
- * {@code migrated} que fuerza el re-guardado) es el mismo del
- * {@code ConfigMigrator} del repo padre.</p>
+ * <p>Sin {@code configVersion} se detecta un config heredado; la migración modifica el target
+ * y el flag {@code migrated} fuerza el re-guardado.</p>
  */
 public final class ConfigMigrator {
 	public static final int LEGACY_STANDALONE_VERSION = 1;
@@ -29,7 +28,7 @@ public final class ConfigMigrator {
 	}
 
 	/**
-	 * Migración v2 → v3 (v1.2): añade {@code customColorsEnabled=true} y
+	 * Migración v2 a v3: añade {@code customColorsEnabled=true} y
 	 * {@code textShadow=true} sin tocar nada más. Gson ya deja el default de
 	 * campo cuando la clave falta; este paso lo hace explícito y verificable.
 	 */
@@ -39,9 +38,7 @@ public final class ConfigMigrator {
 		}
 		boolean changed = false;
 		if (!target.effects.customColorsEnabled) {
-			// Un config v2 nunca tuvo el campo: si Gson lo dejó en false es que
-			// venía explícitamente apagado… no existe ese caso en v2, así que
-			// forzar true solo se nota en configs corruptos; lo dejamos en true.
+			// Gson ya deja el default cuando falta el campo; esto lo hace explícito.
 			changed = true;
 		}
 		target.effects.customColorsEnabled = true;

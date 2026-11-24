@@ -138,7 +138,7 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 		return Math.max(0, totalH - Math.max(20, listRect.height()));
 	}
 
-	/** Tamaño de la casilla del toggle por fila (v1.2, bloque 5). */
+	/** Tamaño de la casilla del toggle por fila . */
 	public static final int ROW_TOGGLE_SIZE = 11;
 
 	/**
@@ -180,7 +180,7 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 		}
 
 		int searchY = bodyTop;
-		// v1.2, bloque 5: interruptor global visible también en esta pantalla.
+		// Interruptor global visible también en esta pantalla.
 		int globalColorsW = this.width >= 430 ? 108 : 0;
 		searchBox = addRenderableWidget(new EditBox(this.font, leftX, searchY,
 				Math.max(80, leftW - (globalColorsW > 0 ? globalColorsW + 6 : 0)), 18,
@@ -327,7 +327,7 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 		return sel != null ? sel.autoHex() : "#E6EDF3";
 	}
 
-	/** Toggle de override desde la casilla de la fila (v1.2, bloque 5). */
+	/** Toggle de override desde la casilla de la fila . */
 	private void toggleRowOverride(EffectEntry entry) {
 		if (entry == null || workingConfig.effects == null) {
 			return;
@@ -650,7 +650,7 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 			}
 			int relY = (int) Math.floor(event.y()) - (listRect.y() + 2) + listScrollOffset;
 			int idx = relY / LIST_ROW_HEIGHT;
-			// v1.2, bloque 5: clic en la casilla de la fila = activar/pausar el
+			// Clic en la casilla de la fila = activar/pausar el
 			// override de ese efecto (sin seleccionar la fila).
 			if (idx >= 0 && idx < filteredEntries.size()) {
 				int hitRowW = listRect.width() - (maxListScroll() > 0 ? 10 : 4);

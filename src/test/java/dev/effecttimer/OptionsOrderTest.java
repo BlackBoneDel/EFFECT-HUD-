@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
 /**
- * Bloque 8 (v1.2): en "Configurar efectos…" el selector «HUD vanilla» es el
+ * en "Configurar efectos…" el selector «HUD vanilla» es el
  * PRIMER control de la lista, dentro de una nueva sección «Visibilidad» (junto
  * al toggle global), y queda por encima de «Estilo». El test verifica el orden
  * real de construcción de la pantalla (fuente de init(), única lista de
@@ -57,6 +57,6 @@ public final class OptionsOrderTest {
 	public void borderControlFollowsBackground() throws Exception {
 		String src = read("src/client/java/dev/effecttimer/client/screen/EffectsConfigScreen.java");
 		assertTrue(src.contains("EffectsFramePolicy.borderControlEnabled"),
-				"el control de borde debe leer la política v1.2");
+				"el control de borde debe leer la política");
 	}
 }

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Bloque 7 (v1.2): {@code textShadow} (default true) decide el flag de sombra
+ * {@code textShadow} (default true) decide el flag de sombra
  * de TODAS las llamadas de texto (nombre, nivel, temporizador —incluido el
  * temporizador de PotionHUD Mini— en HUD real, vista previa y Modo de Prueba).
  * El renderer delega en {@link TextShadowRule}; este test cubre la regla, la

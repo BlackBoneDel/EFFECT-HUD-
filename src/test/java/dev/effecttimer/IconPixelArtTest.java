@@ -12,7 +12,7 @@ import javax.imageio.ImageIO;
 import org.junit.jupiter.api.Test;
 
 /**
- * Bloque 2 (v1.2): el icono debe ser pixel art auténtico — cuadrícula lógica
+ * el icono debe ser pixel art auténtico — cuadrícula lógica
  * 16×16 escalada con nearest-neighbor (cada bloque de 8×8 es un único color),
  * paleta ≤ 12 colores opacos, RGBA con fondo transparente, las 4 esquinas
  * transparentes y margen lógico ≥ 1 px. El arte se genera con

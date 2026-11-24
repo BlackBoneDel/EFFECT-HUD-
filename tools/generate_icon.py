@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generador del icono de Potion Effect (v1.2, bloque 2).
+Generador del icono de Potion Effect.
 
 Dibuja una poción arrojadizable ORIGINAL sobre una cuadrícula lógica de 16×16
 píxeles (sin texturas de Mojang ni de otros mods) y la escala a 128×128 con
@@ -8,7 +8,7 @@ nearest-neighbor (cada píxel lógico = bloque de 8×8 idéntico), de modo que e
 icono tiene el aspecto auténtico de un sprite de Minecraft: bordes duros, sin
 suavizado ni degradados. Fondo transparente con margen lógico ≥ 1 px.
 
-Requisitos cubiertos (spec v1.2):
+Requisitos:
   - frasco de panza redondeada, cuello estrecho, labio y tapón de corcho;
   - líquido rosa con 3 tonos (claro arriba) y vidrio semitransparente;
   - 2-3 píxeles blancos de reflejo arriba-izquierda;

@@ -17,17 +17,16 @@ import java.util.Locale;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests v1.1.1: anclajes de la barra rápida (9 predefinidos + CUSTOM), el filtro
+ * Tests: anclajes de la barra rápida (9 predefinidos + CUSTOM), el filtro
  * de búsqueda puro de la pantalla de colores y el branding exigido (icono PNG
  * 128x128 con alfa dibujado originalmente, fabric.mod.json limpio y crédito
  * "by Denvdrite" en ambos idiomas).
  */
 public final class BrandingAndAnchorsTest {
 
-	// ---------- §ANCLAJES ----------
 	@Test
 	public void anchorCatalogHasNinePresetsPlusCustom() {
-		assertEquals(14, HudAnchor.values().length, "13 predefinidos + CUSTOM (v1.2)");
+		assertEquals(14, HudAnchor.values().length, "13 predefinidos + CUSTOM");
 		assertNotNull(HudAnchor.valueOf("HOTBAR_LEFT"));
 		assertNotNull(HudAnchor.valueOf("HOTBAR_RIGHT"));
 		assertNotNull(HudAnchor.valueOf("CUSTOM"));
@@ -62,7 +61,6 @@ public final class BrandingAndAnchorsTest {
 		assertEquals(15, r.y());
 	}
 
-	// ---------- §BÚSQUEDA ----------
 	@Test
 	public void searchFilterSemantics() {
 		assertTrue(dev.effecttimer.format.EffectSearchFilter.matches("Slowness", "minecraft:slowness", null));
@@ -75,7 +73,6 @@ public final class BrandingAndAnchorsTest {
 		assertTrue(dev.effecttimer.format.EffectSearchFilter.matches("Suerte", null, "suer"));
 	}
 
-	// ---------- §TRACKER por amplificador ----------
 	@Test
 	public void trackerKeepsPeakPerIdAndAmplifier() {
 		dev.effecttimer.format.EffectDurationTracker both = new dev.effecttimer.format.EffectDurationTracker();
@@ -94,7 +91,6 @@ public final class BrandingAndAnchorsTest {
 				dev.effecttimer.format.EffectCategoryKind.BENEFICIAL, amp, ticks, false, false, true, true, 0xFF00FF00);
 	}
 
-	// ---------- §BRANDING ----------
 	private static Path repoFile(String relative) throws Exception {
 		Path direct = Path.of(relative);
 		if (Files.exists(direct)) {

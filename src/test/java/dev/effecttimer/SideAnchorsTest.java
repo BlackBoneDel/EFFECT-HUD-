@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Bloque 3 (v1.2): los anclajes laterales alto/medio/bajo (25 % / 50 % / 75 %
+ * los anclajes laterales alto/medio/bajo (25 % / 50 % / 75 %
  * de altura) en ambos lados, margen horizontal idéntico al de CENTER_*, clamp
  * con cualquier escala y orientación, selector rápido 3x2 con reset de offsets
  * y round-trip JSON de los nombres nuevos.
@@ -72,7 +72,7 @@ public final class SideAnchorsTest {
 			HudRect cr = HudLayoutEngine.resolveAnchorRect(HudAnchor.CENTER_RIGHT, 0, 0, w, h, 854, 480);
 			assertEquals(cr.x(), hr.x(), "margen derecho debe coincidir con CENTER_RIGHT (8 px)");
 			// módulo mayor que la pantalla (900×600 en 300×200): el motor, igual
-			// que en los CENTER_* desde la v1.1, clamp del ORIGEN a pantalla (no
+			// que en los CENTER_*, clamp del ORIGEN a pantalla (no
 			// reescala); el recorte del sobrante lo hace el borde de la GUI.
 			HudRect huge = HudLayoutEngine.resolveAnchorRect(HudAnchor.SIDE_LOW_LEFT, 5000, -5000, 900, 600, 300, 200);
 			assertTrue(huge.x() >= 0 && huge.y() >= 0 && huge.x() < 300 && huge.y() < 200, huge.toString());
@@ -97,7 +97,7 @@ public final class SideAnchorsTest {
 			assertTrue(b.x() >= 0 && b.y() >= 0 && b.right() <= 427 && b.bottom() <= 240,
 					orientation + ": " + b);
 			// escala 2.5 con filas de 300 px = modulo de 750 px: supera la pantalla;
-			// la politica (igual que CENTER_* desde v1.1) es clamp del ORIGEN (el
+			// la politica (igual que CENTER_*) es clamp del ORIGEN (el
 			// exceso solo puede recortarse por el borde; no hay reescala).
 			cfg.scale = 2.5f;
 			HudRect big = HudLayoutEngine.computeEffectsLayout(cfg, metrics, 427, 240).bounds();

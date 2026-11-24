@@ -11,9 +11,9 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
 /**
- * Bloque 1 (v1.2): el nombre visible pasa a ser "Potion Effect" en TODOS los
+ * el nombre visible pasa a ser "Potion Effect" en TODOS los
  * sitios visibles, mientras el id de mod, el paquete y el archivo de config
- * siguen siendo "effecttimer" (decision de compatibilidad de la spec).
+ * siguen siendo "effecttimer" (decisión de compatibilidad).
  */
 public final class PotionEffectRenameTest {
 

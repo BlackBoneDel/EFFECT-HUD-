@@ -29,9 +29,9 @@ public final class EffectsConfig {
 	public VanillaEffectsMode vanillaEffectsMode = VanillaEffectsMode.SHOW_BOTH;
 	public boolean fadeOnLowDuration = true;
 	public boolean colorDurationByRemaining = false;
-	/** v1.2: interruptor global de los colores personalizados por efecto. */
+	/** Interruptor global de los colores personalizados por efecto. */
 	public boolean customColorsEnabled = true;
-	/** v1.2: sombra de texto en nombre, nivel y temporizador. */
+	/** Sombra de texto en nombre, nivel y temporizador. */
 	public boolean textShadow = true;
 	public Map<String, EffectColorOverride> customEffectColors = new LinkedHashMap<>();
 

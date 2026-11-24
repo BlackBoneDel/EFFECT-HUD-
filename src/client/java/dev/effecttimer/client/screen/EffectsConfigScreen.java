@@ -33,8 +33,7 @@ import net.minecraft.network.chat.Component;
 
 /**
  * Pantalla "Configure Effects…" (apariencia / contenido / orden / filtro /
- * comportamiento) con vista previa en vivo, portada de {@code EffectsConfigScreen}
- * del repo padre. Se conserva el botón **Modo de Prueba** del standalone v1.0.0:
+ * comportamiento) con vista previa en vivo, con el botón **Modo de Prueba**:
  * con ON, la vista previa fuerza pociones ficticias con cuenta regresiva en bucle
  * (aunque el jugador tenga efectos reales); al cerrar la GUI el modo se apaga solo.
  */
@@ -92,8 +91,7 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 			);
 		}
 
-		// v1.2, bloque 8: «HUD vanilla» es el PRIMER control de la pantalla,
-		// al inicio de la sección Visibilidad (junto al toggle global).
+		// El HUD vanilla es el primer control de la sección Visibilidad.
 		addSectionLabel(t("effecttimer.section.visibility"), leftX, y);
 		y += 16;
 
@@ -152,7 +150,7 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 		);
 		y += ROW_HEIGHT;
 
-		// v1.2, bloque 3: selector rápido 3x2 (Alta/Media/Baja × I/D). Al pulsar
+		// Selector rápido 3x2 (Alta/Media/Baja × I/D). Al pulsar
 		// un botón fijo se aplican offsets 0 (contrato de salida de CUSTOM).
 		addSectionLabel(t("effecttimer.section.quick_positions"), leftX, y);
 		y += 14;
@@ -238,12 +236,12 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 						.create(leftX, 0, halfW, 20, t("effecttimer.effects.show_background"), (btn, val) -> {
 							effects.showEffectBackground = val;
 							notifyConfigEdited();
-							// v1.2: el control de borde depende del estado del fondo.
+							// El control de borde depende del estado del fondo.
 							this.rebuildWidgets();
 						}),
 				y
 		);
-		// v1.2, bloque 4: sin fondo no hay marco; el control de borde se muestra
+		// Sin fondo no hay marco: el control de borde se muestra
 		// deshabilitado (en gris) con tooltip, pero el valor guardado se conserva.
 		CycleButton<Boolean> borderBtn =
 				CycleButton.booleanBuilder(
@@ -318,7 +316,7 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 		);
 		y += ROW_HEIGHT;
 
-		// v1.2, bloque 5: interruptor GLOBAL de colores personalizados.
+		// Interruptor GLOBAL de colores personalizados.
 		addScrollWidget(
 				CycleButton.booleanBuilder(
 						t("effecttimer.state.on"),
@@ -333,7 +331,7 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 						}),
 				y
 		);
-		// v1.2, bloque 7: sombra de texto.
+		// Sombra de texto.
 		addScrollWidget(
 				CycleButton.booleanBuilder(
 						t("effecttimer.state.on"),
@@ -350,7 +348,7 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 		);
 		y += ROW_HEIGHT;
 
-		// Modo de Prueba (conservado del standalone v1.0.0).
+		// Modo de Prueba.
 		addScrollWidget(
 				CycleButton.booleanBuilder(
 						t("effecttimer.state.on"),
@@ -629,7 +627,7 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 	 * Pociones ficticias del Modo de Prueba con cuenta regresiva en bucle: la
 	 * duración restante se calcula contra {@link #previewAnchorMs} y el TPS del
 	 * cliente, y al llegar a 0 la fila descansa {@value #TEST_LOOP_PAUSE_TICKS}
-	 * ticks y vuelve a empezar (comportamiento MUST de la v1.0.0).
+	 * ticks y vuelve a empezar.
 	 */
 	private List<LiveDataCollector.EffectRenderEntry> buildTestPreviewEntries() {
 		long elapsedMs = Math.max(0L, System.currentTimeMillis() - previewAnchorMs);

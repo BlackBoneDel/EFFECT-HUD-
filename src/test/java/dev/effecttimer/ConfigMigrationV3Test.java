@@ -12,10 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Bloque 9 (v1.2): configVersion sube a 3. La cadena completa
+ * configVersion sube a 3. La cadena completa
  * v1 → v2 → v3 y un v2 puntual solo añaden {@code customColorsEnabled=true} y
  * {@code textShadow=true} sin tocar nada más. El guardado sigue siendo atómico
- * con backup `.corrupt-*.bak` (cubierto en la batería v1.1).
+ * con backup `.corrupt-*.bak`.
  */
 public final class ConfigMigrationV3Test {
 
