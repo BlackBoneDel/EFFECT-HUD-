@@ -1,7 +1,7 @@
 name: Release
 
 # Se dispara al crear una etiqueta v* (p. ej. v1.0.0) o manualmente desde
-# Actions → Release → Run workflow.
+# Actions > Release > Run workflow.
 on:
   push:
     tags:

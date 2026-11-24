@@ -13,9 +13,9 @@ import com.google.gson.JsonObject;
  * automáticos + overrides por efecto; {@code posX/posY} se conservan como
  * anclaje {@code CUSTOM} con esos desplazamientos):</p>
  * <ul>
- *   <li>{@code blinkOnExpire → fadeOnLowDuration}</li>
- *   <li>{@code showIcons → showIcon}</li>
- *   <li>{@code posX/posY → anchor=CUSTOM + offsetX/offsetY}</li>
+ *   <li>{@code blinkOnExpire -> fadeOnLowDuration}</li>
+ *   <li>{@code showIcons -> showIcon}</li>
+ *   <li>{@code posX/posY -> anchor=CUSTOM + offsetX/offsetY}</li>
  * </ul>
  *
  * <p>Sin {@code configVersion} se detecta un config heredado; la migración modifica el target
@@ -61,7 +61,7 @@ public final class ConfigMigrator {
 				sourceVersion = LEGACY_STANDALONE_VERSION;
 			}
 		} else {
-			migrated = true; // archivo sin versionar → se normaliza
+			migrated = true; // archivo sin versionar -> se normaliza
 		}
 
 		if (!hasVersionField && looksLikeLegacyStandalone(rawRoot)) {

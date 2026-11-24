@@ -653,7 +653,7 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 			snapshots.add(LiveDataCollector.snapshotFromEffect(instance, activeLang(), false));
 			holders.add(holder);
 		}
-		// Ordenar con la regla configurada manteniendo el vínculo snapshot→holder.
+		// Ordenar con la regla configurada manteniendo el vínculo snapshot->holder.
 		List<LiveDataCollector.EffectRenderEntry> pairs = new ArrayList<>(snapshots.size());
 		for (int i = 0; i < snapshots.size(); i++) {
 			pairs.add(new LiveDataCollector.EffectRenderEntry(snapshots.get(i), holders.get(i)));

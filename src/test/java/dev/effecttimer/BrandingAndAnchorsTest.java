@@ -112,7 +112,7 @@ public final class BrandingAndAnchorsTest {
 		assertEquals((byte) 'P', png[1]);
 		assertEquals((byte) 'N', png[2]);
 		assertEquals((byte) 'G', png[3]);
-		// IHDR: width, height, bit depth, color type (6 = RGBA → con alfa)
+		// IHDR: width, height, bit depth, color type (6 = RGBA -> con alfa)
 		int w = ((png[16] & 0xFF) << 24) | ((png[17] & 0xFF) << 16) | ((png[18] & 0xFF) << 8) | (png[19] & 0xFF);
 		int h = ((png[20] & 0xFF) << 24) | ((png[21] & 0xFF) << 16) | ((png[22] & 0xFF) << 8) | (png[23] & 0xFF);
 		assertEquals(128, w);

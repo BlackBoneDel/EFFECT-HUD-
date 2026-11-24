@@ -5,7 +5,6 @@ import dev.effecttimer.config.EffectsConfig;
 import dev.effecttimer.config.EffectsVisualStyle;
 import dev.effecttimer.config.HudAnchor;
 import dev.effecttimer.config.HudOrientation;
-import dev.effecttimer.config.PointOffset;
 import dev.effecttimer.config.PotionHudMode;
 import dev.effecttimer.config.PotionMiniDisplayMode;
 import java.util.ArrayList;

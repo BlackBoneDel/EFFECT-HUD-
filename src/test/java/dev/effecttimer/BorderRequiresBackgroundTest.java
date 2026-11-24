@@ -1,6 +1,5 @@
 package dev.effecttimer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -35,7 +34,7 @@ public final class BorderRequiresBackgroundTest {
 		EffectsConfig cfg = new EffectsConfig();
 		cfg.showEffectBackground = false;
 		cfg.showEffectBorder = true;
-		assertFalse(EffectsFramePolicy.drawFrame(cfg), "defaults → sin marco dibujado");
+		assertFalse(EffectsFramePolicy.drawFrame(cfg), "defaults -> sin marco dibujado");
 		cfg.showEffectBackground = true;
 		assertTrue(EffectsFramePolicy.drawFrame(cfg), "con fondo el borde reaparece");
 	}
@@ -113,10 +112,10 @@ public final class BorderRequiresBackgroundTest {
 		// su marco deja de dibujarse (cambio de aspecto REPORTADO, no error).
 		HudConfig vanilla = PresetCatalog.createPreset(PresetId.VANILLA_COMPACT);
 		assertFalse(EffectsFramePolicy.drawFrame(vanilla.effects));
-		// "Lectura ampliada" (bg off + border on) → mismo caso.
+		// "Lectura ampliada" (bg off + border on) -> mismo caso.
 		HudConfig expanded = PresetCatalog.createPreset(PresetId.EXPANDED_READOUT);
 		assertFalse(EffectsFramePolicy.drawFrame(expanded.effects), "reportar en la entrega");
-		// "Texto compacto" nunca pidió borde → sin cambio.
+		// "Texto compacto" nunca pidió borde -> sin cambio.
 		HudConfig compactText = PresetCatalog.createPreset(PresetId.COMPACT_TEXT);
 		assertFalse(compactText.effects.showEffectBorder);
 	}

@@ -42,7 +42,7 @@ PALETTE = {
     "M": (255, 102, 178, 255),    # líquido medio  #FF66B2
     "K": (217, 64, 143, 255),     # líquido oscuro
 }
-# Total opacos distintos: 8 (≤ 12 ✓). Las gotitas reutilizan M/L.
+# Total opacos distintos: 8 (≤ 12). Las gotitas reutilizan M/L.
 
 # Silueta del frasco por fila (col_izq, col_der) inclusiva.
 BODY_ROWS = {

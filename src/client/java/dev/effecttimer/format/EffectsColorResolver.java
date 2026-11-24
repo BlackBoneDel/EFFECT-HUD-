@@ -89,7 +89,7 @@ public final class EffectsColorResolver {
 	/**
 	 * Color automático vívido. Paso base (idempotente por
 	 * construcción: cada canal se ancla a constantes fijas, sin deriva
-	 * multiplicativa): cromático (S ≥ 0.12) → S = max(S, 0.70) con el impulso
+	 * multiplicativa): cromático (S ≥ 0.12) -> S = max(S, 0.70) con el impulso
 	 * S×1.25 cuando aún no llega al suelo; V = max(V, 0.95). Casi gris
 	 * (S < 0.12): no se le inventa tono, solo V = max(V, 0.92).
 	 * Garantía de legibilidad: la luminancia objetivo es max(0.35, min(lum de

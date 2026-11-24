@@ -594,7 +594,7 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 					graphics.fill(sx, sy, sx + 9, sy + 9, 0xFF000000 | entry.autoDisplayRgb());
 					graphics.renderOutline(sx, sy, 9, 9, 0xFF475569);
 				}
-				// casilla de activación por fila (v1.2): ✓ activo · – pausado · · ninguno
+				// casilla por fila: activo, pausado o ninguno
 				int[] tgl = rowToggleRect(rowX, rowW, rowY);
 				graphics.fill(tgl[0], tgl[1], tgl[0] + tgl[2], tgl[1] + tgl[3], 0x33000000);
 				graphics.renderOutline(tgl[0], tgl[1], tgl[2], tgl[3], ov != null && ov.enabled ? 0xFF38BDF8 : 0xFF475569);

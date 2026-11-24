@@ -13,7 +13,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 /**
  * configVersion sube a 3. La cadena completa
- * v1 → v2 → v3 y un v2 puntual solo añaden {@code customColorsEnabled=true} y
+ * v1 -> v2 -> v3 y un v2 puntual solo añaden {@code customColorsEnabled=true} y
  * {@code textShadow=true} sin tocar nada más. El guardado sigue siendo atómico
  * con backup `.corrupt-*.bak`.
  */
@@ -44,11 +44,11 @@ public final class ConfigMigrationV3Test {
 		mgr.load();
 		HudConfig cfg = mgr.getConfig();
 		assertEquals(3, cfg.configVersion, "la cadena debe aterrizar en v3");
-		assertEquals(dev.effecttimer.config.HudAnchor.CUSTOM, cfg.effects.anchor, "posX/posY → CUSTOM+offsets");
+		assertEquals(dev.effecttimer.config.HudAnchor.CUSTOM, cfg.effects.anchor, "posX/posY -> CUSTOM+offsets");
 		assertEquals(133, cfg.effects.offsetX);
 		assertEquals(91, cfg.effects.offsetY);
 		assertEquals(1.5f, cfg.effects.scale);
-		assertTrue(cfg.effects.fadeOnLowDuration, "blinkOnExpire → fadeOnLowDuration");
+		assertTrue(cfg.effects.fadeOnLowDuration, "blinkOnExpire -> fadeOnLowDuration");
 		assertFalse(cfg.effects.showIcon, "showIcons=false respetado");
 		assertTrue(cfg.effects.customColorsEnabled, "v3 añade el global de colores");
 		assertTrue(cfg.effects.textShadow, "v3 añade la sombra de texto");

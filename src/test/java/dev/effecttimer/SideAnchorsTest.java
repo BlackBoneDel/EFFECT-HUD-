@@ -10,7 +10,6 @@ import dev.effecttimer.config.HudAnchor;
 import dev.effecttimer.config.HudConfig;
 import dev.effecttimer.config.HudOrientation;
 import dev.effecttimer.layout.EffectRowMetric;
-import dev.effecttimer.layout.EffectsLayoutResult;
 import dev.effecttimer.layout.HudLayoutEngine;
 import dev.effecttimer.layout.HudRect;
 import java.nio.file.Files;
@@ -154,7 +153,7 @@ public final class SideAnchorsTest {
 				""");
 		ConfigManager migrated = new ConfigManager(file);
 		migrated.load();
-		assertEquals(HudAnchor.CENTER_LEFT, migrated.getConfig().effects.anchor, "v2→v3 no debe tocar anclajes");
+		assertEquals(HudAnchor.CENTER_LEFT, migrated.getConfig().effects.anchor, "v2->v3 no debe tocar anclajes");
 		assertEquals(1.4f, migrated.getConfig().effects.scale);
 		assertTrue(migrated.getConfig().effects.customColorsEnabled, "v3 añade customColorsEnabled=true");
 		assertTrue(migrated.getConfig().effects.textShadow, "v3 añade textShadow=true");

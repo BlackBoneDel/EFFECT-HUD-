@@ -79,11 +79,11 @@ public final class CustomColorsToggleTest {
 		cfg.colorDurationByRemaining = true;
 		assertEquals(0xFF000000 | 0x00FF00, EffectsColorResolver.durationColorArgb(snap(), cfg, 20f));
 
-		// 2. sin override → color por tiempo restante (10 s → rojo vívido)
+		// 2. sin override -> color por tiempo restante (10 s -> rojo vívido)
 		cfg.customColorsEnabled = false;
 		assertEquals(0xFFFF3B3B, EffectsColorResolver.durationColorArgb(snap(), cfg, 20f));
 
-		// 3. sin tiempo-color → automático vívido
+		// 3. sin tiempo-color -> automático vívido
 		cfg.colorDurationByRemaining = false;
 		assertEquals(0xFF000000 | EffectsColorResolver.resolveNativeDisplayRgb(0x7CDFCF),
 				EffectsColorResolver.durationColorArgb(snap(), cfg, 20f));
@@ -104,7 +104,7 @@ public final class CustomColorsToggleTest {
 		assertTrue(again.getConfig().effects.customEffectColors.get("minecraft:luck").enabled,
 				"los datos por efecto sobreviven al global OFF");
 
-		// "Reset" de la pantalla = new EffectsConfig() preservando colores → ON
+		// "Reset" de la pantalla = new EffectsConfig() preservando colores -> ON
 		EffectsConfig reset = new EffectsConfig();
 		assertTrue(reset.customColorsEnabled, "Reset pone customColorsEnabled=true");
 
