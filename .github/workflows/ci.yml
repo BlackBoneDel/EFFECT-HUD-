@@ -113,10 +113,10 @@ jobs:
 
           # Pilar 5: UTF-8 integrity and protected tokens
           protected = ["█", "⚓", "∞", "~", "≤", "%", "Hud Utils"]
-          x_in_jar = "×" in javap_text or "×".encode("utf-8") in cls_bytes or "×" in lang_text
           lang_text = en_raw.decode("utf-8") + es_raw.decode("utf-8")
           cls_bytes = b"".join(blobs.values())
           repl = javap_text.count("\ufffd") + lang_text.count("\ufffd")
+          x_in_jar = "×" in javap_text or "×".encode("utf-8") in cls_bytes or "×" in lang_text
           presence = []
           missing = []
           for tok in protected:
