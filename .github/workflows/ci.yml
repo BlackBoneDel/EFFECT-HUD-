@@ -40,7 +40,7 @@ jobs:
               failures += int(suite.get('failures', 0))
               errors += int(suite.get('errors', 0))
               skipped += int(suite.get('skipped', 0))
-          print(f'Tests executed: {total} (failures={failures}, errors={errors}, skipped={skipped})')
+          print(f'::notice title=Tests::Tests executed: {total} (failures={failures}, errors={errors}, skipped={skipped})')
           PY
 
       - name: Upload test reports
@@ -133,5 +133,5 @@ jobs:
           CLASS_COUNT=$(wc -l < parity/class-diffs.txt | tr -d ' ')
           CLASS_LIST=$(paste -sd ' ' parity/class-diffs.txt)
           NONCLASS_COUNT=$(echo "$NONCLASS" | wc -w | tr -d ' ')
-          echo "${CLASS_COUNT} clases con diferencias de bytecode: [${CLASS_LIST}]"
-          echo "${NONCLASS_COUNT} archivos no-class distintos: [${NONCLASS}]"
+          echo "::notice title=Parity::${CLASS_COUNT} clases con diferencias de bytecode: [${CLASS_LIST}]"
+          echo "::notice title=Parity::${NONCLASS_COUNT} archivos no-class distintos: [${NONCLASS}]"
