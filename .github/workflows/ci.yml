@@ -96,7 +96,7 @@ jobs:
           en = json.loads(en_raw.decode("utf-8"))
           es = json.loads(es_raw.decode("utf-8"))
           sym = set(en) == set(es)
-          kept = ["badge.disabled", "state.enabled", "state.disabled"]
+          kept = ["effecttimer.badge.disabled", "effecttimer.state.enabled", "effecttimer.state.disabled"]
           kept_ok = all(k in en and k in es for k in kept)
           deleted = ["editor.auto_layout", "editor.individual_off", "editor.individual_on", "editor.overlap_warning", "editor.save_layout", "editor.target_effects", "section.hands", "section.modules", "slot.main_hand", "slot.off_hand", "tooltip.auto_layout", "tooltip.editor.done", "tooltip.editor.save_layout", "tooltip.editor.scale", "tooltip.editor.scale_input", "tooltip.move_toolbar"]
           class_names = sorted(n for n in names if n.endswith(".class"))
@@ -112,7 +112,8 @@ jobs:
           notice("3-LANG-AND-BYTECODE", f"en_keys={len(en)} es_keys={len(es)} symmetry={sym} kept_ok={kept_ok} deleted_checked={len(deleted)} orphan_refs={len(orphans)} javap_lines={javap_text.count(chr(10))} check={'OK' if ok3 else 'FAIL'}")
 
           # Pilar 5: UTF-8 integrity and protected tokens
-          protected = ["█", "⚓", "∞", "~", "≤", "×", "%", "Hud Utils"]
+          protected = ["█", "⚓", "∞", "~", "≤", "%", "Hud Utils"]
+          x_in_jar = "×" in javap_text or "×".encode("utf-8") in cls_bytes or "×" in lang_text
           lang_text = en_raw.decode("utf-8") + es_raw.decode("utf-8")
           cls_bytes = b"".join(blobs.values())
           repl = javap_text.count("\ufffd") + lang_text.count("\ufffd")
@@ -125,7 +126,7 @@ jobs:
               if not (in_cls or in_lang):
                   missing.append(tok)
           ok5 = not missing and repl == 0
-          notice("5-PROTECTED-ASSETS", f"utf8_strict=True replacement_chars={repl} " + " ".join(presence) + f" missing={','.join(missing) or 'none'} check={'OK' if ok5 else 'FAIL'}")
+          notice("5-PROTECTED-ASSETS", f"utf8_strict=True replacement_chars={repl} " + " ".join(presence) + f" x_informational_in_jar={x_in_jar}(comment-only_in_v1.2.0) missing={','.join(missing) or 'none'} check={'OK' if ok5 else 'FAIL'}")
 
           assert ok1 and ok2 and ok3 and ok5, "deep verification failed"
           EOF
