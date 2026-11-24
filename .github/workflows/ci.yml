@@ -28,6 +28,154 @@ jobs:
       - name: Run tests and build
         run: ./gradlew test build --no-daemon
 
+      - name: Rerun tests and remap for verification
+        run: ./gradlew test remapJar --rerun-tasks --no-daemon
+
+      - name: Deep Mod Integrity Verification
+        run: |
+          python3 - << 'EOF'
+          import glob, json, os, subprocess, tempfile, zipfile
+          import xml.etree.ElementTree as ET
+
+          def notice(title, msg):
+              print(f"::notice title={title}::{msg}")
+
+          # Pilar 1: JUnit XML
+          total = failures = errors = skipped = 0
+          total_time = 0.0
+          per_class = []
+          for path in sorted(glob.glob("build/test-results/test/TEST-*.xml")):
+              r = ET.parse(path).getroot()
+              t = int(r.get("tests", 0))
+              total += t
+              failures += int(r.get("failures", 0))
+              errors += int(r.get("errors", 0))
+              skipped += int(r.get("skipped", 0))
+              total_time += float(r.get("time", 0.0))
+              per_class.append(f"{r.get('name', '').split('.')[-1]}={t}")
+          ok1 = total == 77 and failures == 0 and errors == 0
+          notice("1-JUNIT-TESTS", f"total={total} passed={total - failures - errors} failed={failures} errors={errors} skipped={skipped} time={total_time:.2f}s classes=" + ",".join(per_class) + f" check={'OK' if ok1 else 'FAIL'}")
+
+          # Pilar 2: jar, fabric.mod.json, entrypoints, mixins, icon
+          jars = [j for j in glob.glob("build/libs/*.jar") if not j.endswith(("-sources.jar", "-dev.jar"))]
+          assert len(jars) == 1, jars
+          jar = jars[0]
+          zf = zipfile.ZipFile(jar)
+          names = set(zf.namelist())
+          fmj = json.loads(zf.read("fabric.mod.json").decode("utf-8"))
+          ep_classes = []
+          for vals in fmj.get("entrypoints", {}).values():
+              for v in vals:
+                  val = v["value"] if isinstance(v, dict) else v
+                  ep_classes.append(val.split("::")[0].replace(".", "/") + ".class")
+          ep_ok = bool(ep_classes) and all(c in names for c in ep_classes)
+          mixin_cfgs = fmj.get("mixins", [])
+          mixin_classes = []
+          mixin_cfg_ok = True
+          for m in mixin_cfgs:
+              cfg = m["config"] if isinstance(m, dict) else m
+              if cfg not in names:
+                  mixin_cfg_ok = False
+                  continue
+              mj = json.loads(zf.read(cfg).decode("utf-8"))
+              pkg = mj.get("package", "").replace(".", "/")
+              for section in ("mixins", "client", "server"):
+                  for c in mj.get(section, []):
+                      mixin_classes.append(f"{pkg}/{c.replace('.', '/')}.class")
+          mixins_ok = mixin_cfg_ok and all(c in names for c in mixin_classes)
+          icon = fmj.get("icon", "")
+          icon_size = zf.getinfo(icon).file_size if icon in names else 0
+          ok2 = fmj.get("id") == "effecttimer" and fmj.get("version") == "1.2.0" and ep_ok and mixins_ok and icon_size > 0
+          notice("2-JAR-FABRIC-MIXINS", f"jar={os.path.basename(jar)} size={os.path.getsize(jar)}B id={fmj.get('id')} version={fmj.get('version')} entrypoints={len(ep_classes)} entrypoints_ok={ep_ok} mixin_configs={len(mixin_cfgs)} mixin_classes={len(mixin_classes)} mixins_ok={mixins_ok} icon={icon} icon_bytes={icon_size} check={'OK' if ok2 else 'FAIL'}")
+
+          # Pilar 3: lang keys and orphan references in bytecode
+          en_name = next(n for n in names if n.endswith("/lang/en_us.json"))
+          es_name = next(n for n in names if n.endswith("/lang/es_es.json"))
+          en_raw = zf.read(en_name)
+          es_raw = zf.read(es_name)
+          en = json.loads(en_raw.decode("utf-8"))
+          es = json.loads(es_raw.decode("utf-8"))
+          sym = set(en) == set(es)
+          kept = ["badge.disabled", "state.enabled", "state.disabled"]
+          kept_ok = all(k in en and k in es for k in kept)
+          deleted = ["editor.auto_layout", "editor.individual_off", "editor.individual_on", "editor.overlap_warning", "editor.save_layout", "editor.target_effects", "section.hands", "section.modules", "slot.main_hand", "slot.off_hand", "tooltip.auto_layout", "tooltip.editor.done", "tooltip.editor.save_layout", "tooltip.editor.scale", "tooltip.editor.scale_input", "tooltip.move_toolbar"]
+          class_names = sorted(n for n in names if n.endswith(".class"))
+          blobs = {n: zf.read(n) for n in class_names}
+          with tempfile.TemporaryDirectory() as tmp:
+              for n in class_names:
+                  zf.extract(n, tmp)
+              javap = subprocess.run(["javap", "-c", "-p"] + [os.path.join(tmp, n) for n in class_names], capture_output=True, text=True, encoding="utf-8")
+              assert javap.returncode == 0, javap.stderr[:500]
+          javap_text = javap.stdout
+          orphans = [k for k in deleted if k in javap_text or any(k.encode("utf-8") in b for b in blobs.values())]
+          ok3 = len(en) == 255 and len(es) == 255 and sym and kept_ok and not orphans
+          notice("3-LANG-AND-BYTECODE", f"en_keys={len(en)} es_keys={len(es)} symmetry={sym} kept_ok={kept_ok} deleted_checked={len(deleted)} orphan_refs={len(orphans)} javap_lines={javap_text.count(chr(10))} check={'OK' if ok3 else 'FAIL'}")
+
+          # Pilar 5: UTF-8 integrity and protected tokens
+          protected = ["█", "⚓", "∞", "~", "≤", "×", "%", "Hud Utils"]
+          lang_text = en_raw.decode("utf-8") + es_raw.decode("utf-8")
+          cls_bytes = b"".join(blobs.values())
+          repl = javap_text.count("\ufffd") + lang_text.count("\ufffd")
+          presence = []
+          missing = []
+          for tok in protected:
+              in_cls = tok.encode("utf-8") in cls_bytes
+              in_lang = tok in lang_text
+              presence.append(f"{tok}:cls={'Y' if in_cls else 'N'}/lang={'Y' if in_lang else 'N'}")
+              if not (in_cls or in_lang):
+                  missing.append(tok)
+          ok5 = not missing and repl == 0
+          notice("5-PROTECTED-ASSETS", f"utf8_strict=True replacement_chars={repl} " + " ".join(presence) + f" missing={','.join(missing) or 'none'} check={'OK' if ok5 else 'FAIL'}")
+
+          assert ok1 and ok2 and ok3 and ok5, "deep verification failed"
+          EOF
+
+      - name: Verify Bytecode Parity vs v1.2.0
+        if: always()
+        run: |
+          git fetch --tags --force
+          git worktree add --detach /tmp/ref-v120 14ff7be
+          (cd /tmp/ref-v120 && chmod +x ./gradlew && ./gradlew remapJar --no-daemon)
+          python3 - << 'EOF'
+          import glob, hashlib, os, subprocess, tempfile, zipfile
+
+          def jar_of(root):
+              js = [j for j in glob.glob(os.path.join(root, "build/libs/*.jar")) if not j.endswith(("-sources.jar", "-dev.jar"))]
+              assert len(js) == 1, js
+              return js[0]
+
+          cur_jar = jar_of(".")
+          ref_jar = jar_of("/tmp/ref-v120")
+          zc = zipfile.ZipFile(cur_jar)
+          zr = zipfile.ZipFile(ref_jar)
+          nc = {n for n in zc.namelist() if not n.endswith("/")}
+          nr = {n for n in zr.namelist() if not n.endswith("/")}
+          only_cur = sorted(nc - nr)
+          only_ref = sorted(nr - nc)
+          common = sorted(nc & nr)
+          class_names = [n for n in common if n.endswith(".class")]
+          nonclass = [n for n in common if not n.endswith(".class")]
+          nonclass_diff = [n for n in nonclass if zc.read(n) != zr.read(n)]
+          sha_diff = [n for n in class_names if hashlib.sha256(zc.read(n)).digest() != hashlib.sha256(zr.read(n)).digest()]
+
+          javap_diff = []
+          with tempfile.TemporaryDirectory() as t1, tempfile.TemporaryDirectory() as t2:
+              for n in class_names:
+                  zc.extract(n, t1)
+                  zr.extract(n, t2)
+                  a = subprocess.run(["javap", "-c", "-p", "-constants", os.path.join(t1, n)], capture_output=True, text=True, encoding="utf-8").stdout
+                  b = subprocess.run(["javap", "-c", "-p", "-constants", os.path.join(t2, n)], capture_output=True, text=True, encoding="utf-8").stdout
+                  if a != b:
+                      javap_diff.append(n)
+
+          entries_ok = not only_cur and not only_ref
+          print(f"::notice title=4-PARITY-VS-V120::classes={len(class_names)} javap_diff={len(javap_diff)} {','.join(javap_diff) or 'none'} sha_diff_lineonly={len(sha_diff)} nonclass_diff={len(nonclass_diff)} {','.join(nonclass_diff) or 'none'} entries_identical={entries_ok}")
+          assert not javap_diff, f"class bytecode diffs: {javap_diff}"
+          assert entries_ok, f"entry list differs: {only_cur} {only_ref}"
+          assert sorted(nonclass_diff) == sorted(["assets/effecttimer/lang/en_us.json", "assets/effecttimer/lang/es_es.json"]), nonclass_diff
+          EOF
+          git worktree remove --force /tmp/ref-v120
+
       - name: Count executed tests
         if: always()
         run: |
