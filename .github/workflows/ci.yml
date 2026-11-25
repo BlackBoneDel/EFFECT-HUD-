@@ -182,6 +182,10 @@ jobs:
     permissions:
       contents: read
       checks: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      PIT_HEAD_SHA: ${{ github.sha }}
+      PIT_DETAILS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v5
@@ -218,6 +222,10 @@ jobs:
           name: pitest-log
           path: pit.log
           if-no-files-found: warn
+
+      - name: Publish the PIT log
+        if: always()
+        run: python3 tools/mutation/pit-log-publish.py pit.log
 
       - name: Summarize mutation results per package
         if: always()
