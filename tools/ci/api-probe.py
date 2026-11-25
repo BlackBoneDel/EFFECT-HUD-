@@ -72,6 +72,23 @@ JAVAP_TARGETS = [
     ("net.minecraft.client.input.MouseButtonEvent", None),
     ("net.minecraft.client.renderer.texture.MissingTextureAtlasSprite", None),
     ("net.minecraft.world.entity.player.Player", r"[Mm]essage"),
+    ("net.minecraft.client.KeyMapping$Category", None),
+    ("net.minecraft.client.gui.components.Button$OnPress", None),
+    ("net.minecraft.client.gui.components.Button$Builder", None),
+    ("net.minecraft.client.gui.components.CycleButton$Builder", None),
+    ("net.minecraft.client.gui.components.EditBox$TextFormatter", None),
+    ("net.minecraft.client.gui.components.Renderable", None),
+    ("net.minecraft.server.packs.resources.PreparableReloadListener", None),
+    ("net.minecraft.server.packs.resources.PreparableReloadListener$PreparationBarrier", None),
+    ("net.minecraft.client.gui.Font", r"width|lineHeight|Substr|plainSubstr"),
+    ("net.minecraft.client.gui.Gui", r"getMobEffectSprite|setScreen|screen"),
+    ("net.minecraft.client.gui.Hud", r"isHidden|getMobEffectSprite"),
+    ("net.minecraft.client.gui.screens.Screen", r"getChildAt|Child|Focus|focus"),
+    ("net.minecraft.client.gui.components.events.AbstractContainerEventHandler", None),
+    ("net.minecraft.client.gui.components.events.GuiEventListener", r"Child|Focus|focus"),
+    ("net.minecraft.client.gui.narration.NarratableEntry", None),
+    ("net.minecraft.client.Minecraft", r"setScreen|Screen|screen"),
+    ("net.minecraft.client.Options", r"hideGui|hide"),
 ]
 
 
@@ -233,7 +250,12 @@ def filter_members(output: str, keep: str | None) -> list[str]:
         stripped = line.strip()
         if not stripped or stripped.startswith("Compiled from"):
             continue
-        if stripped.endswith("{") or stripped == "}":
+        if stripped == "}":
+            continue
+        if stripped.endswith("{"):
+            # The class declaration carries the super types, keep it.
+            if " class " in stripped or " interface " in stripped or " enum " in stripped:
+                members.append(stripped.rstrip("{").rstrip())
             continue
         if pattern.search(stripped):
             members.append(stripped)
