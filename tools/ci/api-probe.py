@@ -37,17 +37,26 @@ BLOCKS_DIR = OUT_DIR / "blocks"
 # (class, keep-pattern). The keep pattern selects the javap members worth
 # reading for the port; None keeps every public/protected member.
 JAVAP_TARGETS = [
-    ("net.minecraft.client.Minecraft", None),
+    # Ordered by how much the 26.2 port depends on them: GitHub keeps only the
+    # first 50 annotations of a check run, so the important ones come first.
+    ("net.minecraft.client.gui.GuiGraphicsExtractor", None),
     ("net.minecraft.client.gui.Gui", None),
     ("net.minecraft.client.gui.Hud", None),
-    ("net.minecraft.client.Options", r"hide|idden|gui|Gui"),
-    ("net.minecraft.client.gui.GuiGraphicsExtractor", None),
-    ("net.minecraft.client.gui.GuiGraphics", None),
     ("net.minecraft.client.gui.screens.Screen", None),
+    ("net.minecraft.client.Minecraft", None),
+    ("net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement", None),
+    ("net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry", None),
+    ("net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements", None),
+    ("net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper", None),
+    ("net.fabricmc.fabric.api.resource.v1.ResourceLoader", None),
+    ("net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents", None),
+    ("net.minecraft.client.KeyMapping", None),
+    ("net.minecraft.client.Options", r"hide|idden|gui|Gui"),
+    ("net.minecraft.client.renderer.state.gui.GuiRenderState", None),
     ("net.minecraft.client.gui.components.AbstractWidget", None),
+    ("net.minecraft.client.gui.components.EditBox", None),
     ("net.minecraft.client.gui.components.AbstractSliderButton", None),
     ("net.minecraft.client.gui.components.Button", None),
-    ("net.minecraft.client.gui.components.EditBox", None),
     ("net.minecraft.client.gui.components.CycleButton", None),
     ("net.minecraft.client.gui.components.Tooltip", None),
     ("net.minecraft.client.gui.components.events.GuiEventListener", None),
@@ -55,22 +64,16 @@ JAVAP_TARGETS = [
     ("net.minecraft.client.gui.screens.inventory.AbstractContainerScreen", None),
     ("net.minecraft.client.gui.screens.ChatScreen", None),
     ("net.minecraft.client.gui.screens.PauseScreen", None),
-    ("net.minecraft.client.KeyMapping", None),
-    ("net.minecraft.client.renderer.state.gui.GuiRenderState", None),
+    ("net.minecraft.client.gui.GuiGraphics", None),
+    ("net.minecraft.client.renderer.RenderPipelines", r"GUI|gui|Gui"),
     ("net.minecraft.client.input.CharacterEvent", None),
     ("net.minecraft.client.input.InputWithModifiers", None),
     ("net.minecraft.client.input.KeyEvent", None),
     ("net.minecraft.client.input.MouseButtonEvent", None),
-    ("net.minecraft.client.renderer.RenderPipelines", r"GUI|gui|Gui"),
     ("net.minecraft.client.renderer.texture.MissingTextureAtlasSprite", None),
     ("net.minecraft.world.entity.player.Player", r"[Mm]essage"),
-    ("net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement", None),
-    ("net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry", None),
-    ("net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements", None),
-    ("net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper", None),
-    ("net.fabricmc.fabric.api.resource.v1.ResourceLoader", None),
-    ("net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents", None),
 ]
+
 
 # Candidate 26.2 replacements: reported as present/absent without being used yet.
 CANDIDATES = [

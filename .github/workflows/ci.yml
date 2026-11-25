@@ -107,6 +107,12 @@ jobs:
     if: always()
     continue-on-error: true
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    env:
+      PROBE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      PROBE_DETAILS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v5
@@ -180,12 +186,19 @@ jobs:
         continue-on-error: true
         run: python3 tools/ci/api-probe-emit.py 80 10
 
+      - name: Publish the API probe through the Checks API
+        if: always()
+        continue-on-error: true
+        run: python3 tools/ci/api-probe-publish.py
+
       - name: Upload the API probe report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: api-probe
-          path: build/api-probe/api-probe.txt
+          path: |
+            build/api-probe/api-probe.txt
+            build/api-probe/javap-full.txt
           if-no-files-found: warn
 
   mutation:
