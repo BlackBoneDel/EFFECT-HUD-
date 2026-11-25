@@ -4,9 +4,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Preajustes del módulo Effects HUD (portados de {@code PresetCatalog} del repo
- * original, con los bloques de armadura eliminados). Como en el original, los
- * colores personalizados por efecto SE CONSERVAN al aplicar un preajuste.
+ * Preajustes de la HUD de efectos. Los colores personalizados por efecto se
+ * conservan al aplicar un preajuste.
  */
 public final class PresetCatalog {
 	private PresetCatalog() {
@@ -80,8 +79,7 @@ public final class PresetCatalog {
 		}
 
 		target.effects.customEffectColors = preservedColors;
-		// v1.2: los preajustes NO cambian el interruptor global de colores ni
-		// la sombra de texto (bloque 5.5 y bloque 7).
+		// Los preajustes no cambian el interruptor global de colores ni la sombra de texto.
 		target.effects.customColorsEnabled = preserveCustomColors;
 		target.effects.textShadow = preserveTextShadow;
 	}

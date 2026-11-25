@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Bloque 5 (v1.2): interruptor global {@code customColorsEnabled} (default ON)
+ * interruptor global {@code customColorsEnabled} (default ON)
  * y toggle por efecto. Con el global en OFF ningún override se aplica (nombre,
  * temporizador y acento vuelven a la cadena normal), pero TODOS los hex y los
  * toggles individuales quedan guardados y vuelven al reactivar.
@@ -79,11 +79,11 @@ public final class CustomColorsToggleTest {
 		cfg.colorDurationByRemaining = true;
 		assertEquals(0xFF000000 | 0x00FF00, EffectsColorResolver.durationColorArgb(snap(), cfg, 20f));
 
-		// 2. sin override → color por tiempo restante (10 s → rojo vívido)
+		// 2. sin override -> color por tiempo restante (10 s -> rojo vívido)
 		cfg.customColorsEnabled = false;
 		assertEquals(0xFFFF3B3B, EffectsColorResolver.durationColorArgb(snap(), cfg, 20f));
 
-		// 3. sin tiempo-color → automático vívido
+		// 3. sin tiempo-color -> automático vívido
 		cfg.colorDurationByRemaining = false;
 		assertEquals(0xFF000000 | EffectsColorResolver.resolveNativeDisplayRgb(0x7CDFCF),
 				EffectsColorResolver.durationColorArgb(snap(), cfg, 20f));
@@ -104,7 +104,7 @@ public final class CustomColorsToggleTest {
 		assertTrue(again.getConfig().effects.customEffectColors.get("minecraft:luck").enabled,
 				"los datos por efecto sobreviven al global OFF");
 
-		// "Reset" de la pantalla = new EffectsConfig() preservando colores → ON
+		// "Reset" de la pantalla = new EffectsConfig() preservando colores -> ON
 		EffectsConfig reset = new EffectsConfig();
 		assertTrue(reset.customColorsEnabled, "Reset pone customColorsEnabled=true");
 
@@ -137,9 +137,9 @@ public final class CustomColorsToggleTest {
 
 	@Test
 	public void listRowVisualsAndGlobalControls() throws Exception {
-		// UI de bloque 5: casilla por fila (hit-test), muestra atenuada + tachado
+		// UI de casilla por fila (hit-test), muestra atenuada + tachado
 		// cuando el override esta pausado o el global esta OFF, y boton global
-		// TAMBIEN en «Configurar efectos» (spec 5.a).
+		// TAMBIEN en «Configurar efectos».
 		Path screen = Path.of("src/client/java/dev/effecttimer/client/screen/EffectColorsScreen.java");
 		if (!java.nio.file.Files.exists(screen)) {
 			screen = Path.of("..", "src/client/java/dev/effecttimer/client/screen/EffectColorsScreen.java");

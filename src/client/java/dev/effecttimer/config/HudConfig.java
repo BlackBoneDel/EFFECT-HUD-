@@ -1,14 +1,10 @@
 package dev.effecttimer.config;
 
 /**
- * Raíz de configuración de Potion Effect (persistida en config/effecttimer.json).
- * Portada de {@code HudConfig} (HUD-MODS) reducida al módulo Effects HUD (único
- * módulo del standalone; los bloques de otros módulos se eliminaron). El campo de esquema pasa a llamarse
- * {@code configVersion} según la spec v1.1:
- * <ul>
- *   <li>1 = formato plano del standalone v1.0.0 (migrado automáticamente),</li>
- *   <li>2 = esquema actual (objeto {@code effects} anidado).</li>
- * </ul>
+ * Raíz de la configuración guardada en config/effecttimer.json.
+ *
+ * <p>{@code configVersion}: 1 = formato plano heredado (migrado automáticamente),
+ * 2 = objeto {@code effects} anidado, 3 = esquema actual.</p>
  */
 public final class HudConfig {
 	public static final int CURRENT_CONFIG_VERSION = 3;

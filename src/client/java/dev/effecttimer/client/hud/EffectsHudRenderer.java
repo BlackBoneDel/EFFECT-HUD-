@@ -97,8 +97,8 @@ public final class EffectsHudRenderer {
 
 	/**
 	 * Dibuja una lista EXACTA de entradas (reales o ficticias) dentro de la caja
-	 * de vista previa. Se introdujo para conservar el "Modo de Prueba" del
-	 * standalone v1.0.0: la pantalla de configuración puede inyectar pociones
+	 * de vista previa. Lo usa el "Modo de Prueba" de la pantalla de configuración:
+	 * puede inyectar pociones
 	 * ficticias con cuenta regresiva en bucle aunque el jugador tenga efectos
 	 * reales.
 	 */
@@ -277,7 +277,7 @@ public final class EffectsHudRenderer {
 		int h = placement.unscaledHeight();
 
 		boolean drawBg = config.showEffectBackground;
-		// v1.2 «sin fondo = sin marco»: el borde guardado se conserva pero solo
+		// Sin fondo no hay marco: el borde guardado se conserva pero solo
 		// se dibuja con el fondo activado.
 		boolean drawBorder = EffectsFramePolicy.drawFrame(config);
 		boolean shadow = TextShadowRule.shadow(config);
@@ -318,7 +318,7 @@ public final class EffectsHudRenderer {
 					graphics.renderOutline(x, y, w, h, border);
 				}
 				// El acento lateral es decorativo (no es marco): se mantiene
-				// aunque no haya fondo ni borde (spec v1.2, bloque 4).
+				// aunque no haya fondo ni borde .
 				int accent = ARGB.multiplyAlpha(EffectsColorResolver.accentColorArgb(snap, config), alpha);
 				graphics.fill(x + 1, y + 1, x + 3, y + h - 1, accent);
 			}
@@ -333,7 +333,6 @@ public final class EffectsHudRenderer {
 				}
 			}
 			case POTION_HUD -> {
-				// handled above
 			}
 		}
 

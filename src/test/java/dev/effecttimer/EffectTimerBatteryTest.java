@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.effecttimer.config.ColorHexUtils;
@@ -42,19 +41,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Batería v1.1.0–v1.2.0 sobre la lógica portada de HUD-MODS (paquetes config/format/
- * layout). Cubre los puntos de la spec que pueden validarse sin cliente de
+ * Batería sobre la lógica pura (paquetes config/format/
+ * layout). Cubre los puntos que pueden validarse sin cliente de
  * Minecraft; los flujos de pantalla (vista previa, Modo de Prueba, editor
  * visual) se verifican en juego y quedan documentados en docs/VERIFICATION.md.
  */
 public final class EffectTimerBatteryTest {
 
-	// ---------- §1 valores por defecto ----------
 	@Test
 	public void defaultsMatchSpec() {
 		EffectsConfig d = new EffectsConfig();
@@ -82,8 +79,8 @@ public final class EffectTimerBatteryTest {
 		assertEquals(PotionHudMode.NORMAL, d.potionHudMode);
 		assertEquals(PotionMiniDisplayMode.TIMER_TEXT, d.potionMiniDisplay);
 		assertTrue(d.customEffectColors.isEmpty());
-		assertTrue(d.customColorsEnabled, "v1.2: global de colores por defecto ON");
-		assertTrue(d.textShadow, "v1.2: sombra de texto por defecto ON");
+		assertTrue(d.customColorsEnabled, "global de colores por defecto ON");
+		assertTrue(d.textShadow, "sombra de texto por defecto ON");
 		assertEquals(3, HudConfig.CURRENT_CONFIG_VERSION);
 		assertEquals(ModLanguage.ENGLISH, new HudConfig().language);
 		VisibilityConfig vis = new VisibilityConfig();
@@ -93,7 +90,6 @@ public final class EffectTimerBatteryTest {
 		assertTrue(vis.requireActiveWorld);
 	}
 
-	// ---------- §2/§3 clamps ----------
 	@Test
 	public void validatorClamps() {
 		HudConfig bad = new HudConfig();
@@ -128,7 +124,6 @@ public final class EffectTimerBatteryTest {
 		assertEquals(HudAnchor.CENTER_RIGHT, ConfigValidator.validateAndSanitize(c).config().effects.anchor);
 	}
 
-	// ---------- §30/§31 ids y hex ----------
 	@Test
 	public void effectIdNormalization() {
 		assertEquals("minecraft:speed", ConfigValidator.normalizeEffectId("speed").orElse(""));
@@ -164,7 +159,6 @@ public final class EffectTimerBatteryTest {
 		assertEquals("#E6EDF3", new EffectColorOverride().colorHex);
 	}
 
-	// ---------- §38 migración v1.0.0 ----------
 	@Test
 	public void migratesLegacyStandaloneKeys() {
 		String legacy = "{\"enabled\":false,\"posX\":100,\"posY\":50,\"scale\":1.5,"
@@ -189,7 +183,6 @@ public final class EffectTimerBatteryTest {
 		assertFalse(ConfigMigrator.migrate(JsonParser.parseString("{\"configVersion\":3}").getAsJsonObject(), modern));
 	}
 
-	// ---------- §35 presets ----------
 	@Test
 	public void presetsApplyAndPreserveColors() {
 		HudConfig withColors = new HudConfig();
@@ -212,7 +205,6 @@ public final class EffectTimerBatteryTest {
 		assertEquals(1.0f, vanilla.effects.scale);
 	}
 
-	// ---------- §37/§38 persistencia ----------
 	@Test
 	public void configRoundTripAtomicAndCorruptBackup(@TempDir Path dir) {
 		Path file = dir.resolve("effecttimer.json");
@@ -253,7 +245,6 @@ public final class EffectTimerBatteryTest {
 		assertEquals(1.0f, mgr4.getConfig().effects.scale);
 	}
 
-	// ---------- §16/§17 formato y colores ----------
 	@Test
 	public void durationFormatting() {
 		assertEquals("\u221e", DurationFormatter.formatTicks(100, 20f, true));
@@ -266,10 +257,10 @@ public final class EffectTimerBatteryTest {
 	@Test
 	public void durationColorThresholds() {
 		assertEquals(0xFFD8DEE9, DurationFormatter.durationColorArgb(100, 20f, false, false));
-		assertEquals(0xFFFF3B3B, DurationFormatter.durationColorArgb(200, 20f, false, true), "v1.2 rojo vívido");
-		assertEquals(0xFFFFE600, DurationFormatter.durationColorArgb(600, 20f, false, true), "v1.2 amarillo vívido");
-		assertEquals(0xFF00E5FF, DurationFormatter.durationColorArgb(-1, 20f, true, true), "v1.2 cian vívido");
-		assertEquals(0xFFFFFFFF, DurationFormatter.durationColorArgb(6000, 20f, false, true), "v1.2 neutro blanco");
+		assertEquals(0xFFFF3B3B, DurationFormatter.durationColorArgb(200, 20f, false, true), "rojo vívido");
+		assertEquals(0xFFFFE600, DurationFormatter.durationColorArgb(600, 20f, false, true), "amarillo vívido");
+		assertEquals(0xFF00E5FF, DurationFormatter.durationColorArgb(-1, 20f, true, true), "cian vívido");
+		assertEquals(0xFFFFFFFF, DurationFormatter.durationColorArgb(6000, 20f, false, true), "neutro blanco");
 	}
 
 	@Test
@@ -283,7 +274,6 @@ public final class EffectTimerBatteryTest {
 		assertEquals("2", RomanNumerals.formatLevel(1, LevelFormat.ARABIC, true));
 	}
 
-	// ---------- §20/§21 tracker ----------
 	@Test
 	public void observedMaxAndPurge() {
 		EffectDurationTracker tracker = new EffectDurationTracker();
@@ -301,7 +291,6 @@ public final class EffectTimerBatteryTest {
 		assertEquals(1.0f, tracker.remainingFraction(inf));
 	}
 
-	// ---------- §18 filtros y orden ----------
 	@Test
 	public void sortModesAndFilters() {
 		EffectsConfig ord = new EffectsConfig();
@@ -325,7 +314,6 @@ public final class EffectTimerBatteryTest {
 		assertEquals(1, EffectOrderer.prepare(new ArrayList<>(List.of(s, noParticles)), ord).size());
 	}
 
-	// ---------- §27/§28 color override > automático > nativo ----------
 	@Test
 	public void colorOverridePriority() {
 		EffectsConfig col = new EffectsConfig();
@@ -334,13 +322,12 @@ public final class EffectTimerBatteryTest {
 		assertEquals(0xFF00FF00, EffectsColorResolver.durationColorArgb(
 				snap("minecraft:speed", "Speed", EffectCategoryKind.BENEFICIAL, 1, 200, 0xFF0000), col, 20f));
 		assertEquals(0xFFFF3B3B, EffectsColorResolver.durationColorArgb(
-				snap("minecraft:haste", "H", EffectCategoryKind.BENEFICIAL, 0, 100, 0x99AABB), col, 20f), "v1.2 rojo vívido");
+				snap("minecraft:haste", "H", EffectCategoryKind.BENEFICIAL, 0, 100, 0x99AABB), col, 20f), "rojo vívido");
 		col.customEffectColors.put("minecraft:slowness", new EffectColorOverride(false, "#00FF00"));
 		assertEquals(0xFFFF3B3B, EffectsColorResolver.durationColorArgb(
 				snap("minecraft:slowness", "S", EffectCategoryKind.HARMFUL, 0, 50, 0), col, 20f));
 	}
 
-	// ---------- §12/§13/§25/§26 motor de layout ----------
 	@Test
 	public void layoutEngineGeometry() {
 		EffectsConfig lay = new EffectsConfig();
@@ -380,7 +367,7 @@ public final class EffectTimerBatteryTest {
 
 		assertTrue(HudLayoutEngine.hasAnyOverlap(List.of(new HudRect(0, 0, 10, 10), new HudRect(5, 5, 10, 10))));
 		assertFalse(HudLayoutEngine.hasAnyOverlap(List.of(new HudRect(0, 0, 10, 10), new HudRect(20, 20, 10, 10))));
-		assertEquals(14, HudAnchor.values().length, "13 predefinidos + CUSTOM (v1.2)");
+		assertEquals(14, HudAnchor.values().length, "13 predefinidos + CUSTOM");
 	}
 
 	@Test
@@ -403,7 +390,6 @@ public final class EffectTimerBatteryTest {
 		assertEquals(1.0f, src.effects.scale);
 	}
 
-	// ---------- §36 i18n ----------
 	@Test
 	public void languageFilesParityAndSpecTexts() throws Exception {
 		Path base = Path.of("src/main/resources/assets/effecttimer/lang");

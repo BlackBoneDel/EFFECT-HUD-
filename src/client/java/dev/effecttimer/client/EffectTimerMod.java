@@ -26,8 +26,8 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import org.lwjgl.glfw.GLFW;
 
 /**
- * Punto de entrada de Potion Effect (standalone). Portado de
- * {@code CustomizableHudClient} (repo padre) manteniendo su comportamiento:
+ * Punto de entrada de Potion Effect.
+ * Comportamiento:
  * <ul>
  *   <li>O abre la pantalla principal de configuración;</li>
  *   <li>H abre el editor visual (HUD editor);</li>
@@ -167,13 +167,10 @@ public final class EffectTimerMod implements ClientModInitializer {
 
 	private static void drainClicks() {
 		while (openConfigKey.consumeClick()) {
-			// drained
 		}
 		while (openEditorKey.consumeClick()) {
-			// drained
 		}
 		while (toggleEffectsKey.consumeClick()) {
-			// drained
 		}
 	}
 }

@@ -1,6 +1,5 @@
 package dev.effecttimer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 /**
- * Bloque 4 (v1.2): «sin fondo = sin marco». El marco (outline de fila/tarjeta y
+ * «sin fondo = sin marco». El marco (outline de fila/tarjeta y
  * bordes de fichas PotionHUD normal/mini) solo se dibuja con ambos flags ON; el
  * valor {@code showEffectBorder} se conserva guardado; el acento de CLEAN_CARD
  * es decorativo y se mantiene siempre.
@@ -35,7 +34,7 @@ public final class BorderRequiresBackgroundTest {
 		EffectsConfig cfg = new EffectsConfig();
 		cfg.showEffectBackground = false;
 		cfg.showEffectBorder = true;
-		assertFalse(EffectsFramePolicy.drawFrame(cfg), "defaults v1.1 → sin marco dibujado");
+		assertFalse(EffectsFramePolicy.drawFrame(cfg), "defaults -> sin marco dibujado");
 		cfg.showEffectBackground = true;
 		assertTrue(EffectsFramePolicy.drawFrame(cfg), "con fondo el borde reaparece");
 	}
@@ -87,7 +86,7 @@ public final class BorderRequiresBackgroundTest {
 		}
 		String src = Files.readString(renderer);
 		assertTrue(src.contains("EffectsFramePolicy.drawFrame(config)"),
-				"drawRow debe leer el borde a través de la política v1.2");
+				"drawRow debe leer el borde a través de la política");
 		assertFalse(src.contains("boolean drawBorder = config.showEffectBorder;"),
 				"no debe quedar el antiguo borde independiente");
 	}
@@ -95,7 +94,7 @@ public final class BorderRequiresBackgroundTest {
 	@Test
 	public void screenGatesBorderControlOnBackground() throws Exception {
 		// El control de «Borde de marco» debe quedar inactivo + tooltip
-		// «Requiere activar el fondo…» cuando el fondo esta apagado (spec 4.e).
+		// «Requiere activar el fondo…» cuando el fondo esta apagado.
 		Path screen = Path.of("src/client/java/dev/effecttimer/client/screen/EffectsConfigScreen.java");
 		if (!Files.exists(screen)) {
 			screen = Path.of("..", "src/client/java/dev/effecttimer/client/screen/EffectsConfigScreen.java");
@@ -113,10 +112,10 @@ public final class BorderRequiresBackgroundTest {
 		// su marco deja de dibujarse (cambio de aspecto REPORTADO, no error).
 		HudConfig vanilla = PresetCatalog.createPreset(PresetId.VANILLA_COMPACT);
 		assertFalse(EffectsFramePolicy.drawFrame(vanilla.effects));
-		// "Lectura ampliada" (bg off + border on) → mismo caso.
+		// "Lectura ampliada" (bg off + border on) -> mismo caso.
 		HudConfig expanded = PresetCatalog.createPreset(PresetId.EXPANDED_READOUT);
 		assertFalse(EffectsFramePolicy.drawFrame(expanded.effects), "reportar en la entrega");
-		// "Texto compacto" nunca pidió borde → sin cambio.
+		// "Texto compacto" nunca pidió borde -> sin cambio.
 		HudConfig compactText = PresetCatalog.createPreset(PresetId.COMPACT_TEXT);
 		assertFalse(compactText.effects.showEffectBorder);
 	}

@@ -7,8 +7,8 @@ import dev.effecttimer.format.EffectsColorResolver;
 import org.junit.jupiter.api.Test;
 
 /**
- * Bloque 6 (v1.2): color automático vívido. Tono conservado (±3°) en cromáticos,
- * S ≥ 0.70 (donde la legibilidad lo permite), V ≥ 0.95; casi-grises → V ≥ 0.92
+ * color automático vívido. Tono conservado (±3°) en cromáticos,
+ * S ≥ 0.70 (donde la legibilidad lo permite), V ≥ 0.95; casi-grises -> V ≥ 0.92
  * sin inventarles tono; luminancia relativa ≥ 0.35; idempotencia; nunca baja el
  * valor de entrada; los overrides del usuario no se tocan.
  */
@@ -99,7 +99,7 @@ public final class VividColorsTest {
 
 	@Test
 	public void paletteOfTenColorsUnchanged() {
-		// bloque 6: la paleta del selector NO se toca
+		// la paleta del selector NO se toca
 		assertEquals(10, dev.effecttimer.config.ColorHexUtils.EFFECT_PALETTE.size());
 	}
 }

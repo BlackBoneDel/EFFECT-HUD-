@@ -5,15 +5,13 @@ import dev.effecttimer.config.EffectsConfig;
 import dev.effecttimer.config.EffectsVisualStyle;
 import dev.effecttimer.config.HudAnchor;
 import dev.effecttimer.config.HudOrientation;
-import dev.effecttimer.config.PointOffset;
 import dev.effecttimer.config.PotionHudMode;
 import dev.effecttimer.config.PotionMiniDisplayMode;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Motor de layout del HUD de efectos (portado de {@code HudLayoutEngine} del repo
- * padre, sin la parte de armadura). {@link #computeEffectsLayout} replica la
+ * Motor de layout del HUD de efectos. {@link #computeEffectsLayout} replica la
  * geometría original del PotionHUD: cajas por fila, ancho unificado en vertical
  * (excepto POTION_HUD MINI, que centra sus filas), escalado sobre el origen del
  * anclaje y clamp a pantalla.

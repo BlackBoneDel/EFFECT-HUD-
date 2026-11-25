@@ -10,7 +10,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 
 /**
- * Selector rápido «Posiciones rápidas» (v1.2, bloque 3): cuadrícula de 3 filas
+ * Selector rápido «Posiciones rápidas» : cuadrícula de 3 filas
  * × 2 columnas — Alta/Media/Baja × Izquierda/Derecha. Compartido por la
  * pantalla "Configurar efectos…" y la barra de herramientas del editor visual.
  * El anclaje activo se marca con el prefijo «» ». La lógica de mapeo es pura
@@ -68,7 +68,7 @@ public final class AnchorQuickPicker {
 	}
 
 	/**
-	 * Variante en barra horizontal (editor visual, v1.2): los bounds quedan
+	 * Variante en barra horizontal (editor visual): los bounds quedan
 	 * fijados en la creacion (mojmap 1.21.11 no expone setBounds en botones).
 	 */
 	public static List<Button> buildRow(HudAnchor current, Consumer<HudAnchor> onPick,
