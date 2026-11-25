@@ -71,6 +71,9 @@ allprojects { Project p ->
         // sends to the minion - including the client screens, which need a
         // running Minecraft to be initialized.
         ext.targetTests.set(['dev.effecttimer.*Test'] as Set)
+        // The installation test needs Fabric Loader, which is not part of the
+        // PIT classpath (see below), so it is not part of the oracle.
+        ext.excludedTestClasses.set(['dev.effecttimer.ModInstallationTest'] as Set)
 
         // Loom splits the source sets: every source file of this mod lives in
         // "src/client/java", so the client source set is the one PIT has to

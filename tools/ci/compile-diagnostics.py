@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Temporary CI helper: turn the Gradle log into readable diagnostics.
+"""CI helper: turn the Gradle log into readable diagnostics.
 
 javac prints the errors in several shapes depending on the failure, so this
 helper collects every line that mentions an error, keeps the "symbol:" and
 "location:" follow-ups that belong to it, and writes the result to the job step
 summary plus GitHub Actions annotations.
 
-This file is temporary: it is removed again by the "Remove temporary CI probes"
-commit.
+The raw log is published through the Checks API, because the workflow log of a
+job cannot be downloaded reliably (the log archive endpoint answers with an
+EOF on some runners).
 """
 
 from __future__ import annotations
@@ -75,7 +76,7 @@ def publish(text: str) -> None:
     token = os.environ.get("GITHUB_TOKEN", "")
     api_url = os.environ.get("GITHUB_API_URL", "https://api.github.com")
     repository = os.environ.get("GITHUB_REPOSITORY", "")
-    head_sha = os.environ.get("PROBE_HEAD_SHA") or os.environ.get("GITHUB_SHA", "")
+    head_sha = os.environ.get("CI_HEAD_SHA") or os.environ.get("GITHUB_SHA", "")
     if not token or not repository or not head_sha or not text.strip():
         return
     chunks: list[str] = []
@@ -97,7 +98,7 @@ def publish(text: str) -> None:
             "head_sha": head_sha,
             "status": "completed",
             "conclusion": "success",
-            "details_url": os.environ.get("PROBE_DETAILS_URL", "") or None,
+            "details_url": os.environ.get("CI_DETAILS_URL", "") or None,
             "output": {
                 "title": name,
                 "summary": f"Gradle build log, part {index} of {len(chunks)}.",

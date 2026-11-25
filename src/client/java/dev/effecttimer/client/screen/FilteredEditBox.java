@@ -39,7 +39,7 @@ public final class FilteredEditBox extends EditBox {
 		String candidate = getValue() + typed;
 		if (!filter.test(candidate)) {
 			// Se consume el carácter pero no se inserta: es el mismo
-			// comportamiento que tenía el filtro de 1.21.11.
+			// comportamiento que tenía el filtro de 1.21.11 (eliminado en 26.2).
 			return true;
 		}
 		return super.charTyped(event);

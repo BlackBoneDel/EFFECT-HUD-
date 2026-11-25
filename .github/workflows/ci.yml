@@ -16,8 +16,8 @@ jobs:
       checks: write
     env:
       GITHUB_TOKEN: ${{ github.token }}
-      PROBE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      PROBE_DETAILS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      CI_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      CI_DETAILS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v5
@@ -67,114 +67,13 @@ jobs:
       - name: Upload temporary mod JAR (30 days)
         uses: actions/upload-artifact@v4
         with:
-          name: effect-hud-pr2-build
+          name: mod-jar
           path: |
             build/libs/*.jar
             !build/libs/*-sources.jar
             !build/libs/*-dev.jar
           retention-days: 30
           if-no-files-found: error
-
-  api-probe:
-    # Temporary probe for the 26.2 port: records hard evidence about the new
-    # API surface (resolved jars, import FQNs, javap) even when the build fails.
-    if: always()
-    continue-on-error: true
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      checks: write
-    env:
-      GITHUB_TOKEN: ${{ github.token }}
-      PROBE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      PROBE_DETAILS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-    steps:
-      - name: Check out the repository
-        uses: actions/checkout@v5
-
-      - name: Set up JDK 25 (Temurin)
-        uses: actions/setup-java@v5
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-          cache: 'gradle'
-
-      - name: Grant execute permission to gradlew
-        run: chmod +x ./gradlew
-
-      - name: Resolve the 26.2 classpath
-        continue-on-error: true
-        run: ./gradlew --no-daemon --console=plain -I tools/ci/api-probe.init.gradle apiProbeClasspath
-
-      - name: Inspect the resolved jars
-        if: always()
-        continue-on-error: true
-        run: python3 tools/ci/api-probe.py
-
-      - name: Emit the API probe summary
-        if: always()
-        continue-on-error: true
-        run: python3 tools/ci/api-probe-emit.py --summary
-
-      - name: Emit the API probe javap (1/9)
-        if: always()
-        continue-on-error: true
-        run: python3 tools/ci/api-probe-emit.py 0 10
-
-      - name: Emit the API probe javap (2/9)
-        if: always()
-        continue-on-error: true
-        run: python3 tools/ci/api-probe-emit.py 10 10
-
-      - name: Emit the API probe javap (3/9)
-        if: always()
-        continue-on-error: true
-        run: python3 tools/ci/api-probe-emit.py 20 10
-
-      - name: Emit the API probe javap (4/9)
-        if: always()
-        continue-on-error: true
-        run: python3 tools/ci/api-probe-emit.py 30 10
-
-      - name: Emit the API probe javap (5/9)
-        if: always()
-        continue-on-error: true
-        run: python3 tools/ci/api-probe-emit.py 40 10
-
-      - name: Emit the API probe javap (6/9)
-        if: always()
-        continue-on-error: true
-        run: python3 tools/ci/api-probe-emit.py 50 10
-
-      - name: Emit the API probe javap (7/9)
-        if: always()
-        continue-on-error: true
-        run: python3 tools/ci/api-probe-emit.py 60 10
-
-      - name: Emit the API probe javap (8/9)
-        if: always()
-        continue-on-error: true
-        run: python3 tools/ci/api-probe-emit.py 70 10
-
-      - name: Emit the API probe javap (9/9)
-        if: always()
-        continue-on-error: true
-        run: python3 tools/ci/api-probe-emit.py 80 10
-
-      - name: Publish the API probe through the Checks API
-        if: always()
-        continue-on-error: true
-        run: python3 tools/ci/api-probe-publish.py
-
-      - name: Upload the API probe report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: api-probe
-          path: |
-            build/api-probe/api-probe.txt
-            build/api-probe/javap-full.txt
-          if-no-files-found: warn
 
   mutation:
     if: github.event_name == 'workflow_dispatch'
@@ -186,9 +85,6 @@ jobs:
       GITHUB_TOKEN: ${{ github.token }}
       PIT_HEAD_SHA: ${{ github.sha }}
       PIT_DETAILS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      # Temporary: shows the output of the PIT minion process, which is where
-      # the stack traces of a crashing minion end up.
-      PIT_VERBOSITY: VERBOSE_NO_SPINNER
     steps:
       - name: Check out the repository
         uses: actions/checkout@v5
