@@ -89,6 +89,16 @@ JAVAP_TARGETS = [
     ("net.minecraft.client.gui.narration.NarratableEntry", None),
     ("net.minecraft.client.Minecraft", r"setScreen|Screen|screen"),
     ("net.minecraft.client.Options", r"hideGui|hide"),
+    ("net.minecraft.server.packs.resources.PreparableReloadListener$SharedState", None),
+    ("net.minecraft.server.packs.resources.ResourceManagerReloadListener", None),
+    ("net.minecraft.server.packs.resources.ResourceManager", r"getResourceStack|getNamespaces|listResources"),
+    ("net.fabricmc.fabric.api.resource.v1.SimpleSynchronousResourceReloadListener", None),
+    ("net.minecraft.client.gui.components.events.ContainerEventHandler", None),
+    ("net.minecraft.util.FormattedCharSequence", None),
+    ("net.minecraft.client.gui.components.AbstractButton", None),
+    ("net.minecraft.locale.Language", r"loadFromJson"),
+    ("net.minecraft.server.packs.PackType", None),
+    ("net.minecraft.client.gui.GuiGraphicsExtractor", r"blitSprite|fill|outline|text|centeredText"),
 ]
 
 
