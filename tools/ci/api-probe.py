@@ -57,9 +57,13 @@ JAVAP_TARGETS = [
     ("net.minecraft.client.gui.screens.PauseScreen", None),
     ("net.minecraft.client.KeyMapping", None),
     ("net.minecraft.client.renderer.state.gui.GuiRenderState", None),
+    ("net.minecraft.client.input.CharacterEvent", None),
+    ("net.minecraft.client.input.InputWithModifiers", None),
+    ("net.minecraft.client.input.KeyEvent", None),
+    ("net.minecraft.client.input.MouseButtonEvent", None),
     ("net.minecraft.client.renderer.RenderPipelines", r"GUI|gui|Gui"),
     ("net.minecraft.client.renderer.texture.MissingTextureAtlasSprite", None),
-    ("net.minecraft.world.entity.player.Player", r"essage"),
+    ("net.minecraft.world.entity.player.Player", r"[Mm]essage"),
     ("net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement", None),
     ("net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry", None),
     ("net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements", None),
@@ -288,9 +292,26 @@ def main() -> int:
         status, output = javap(classpath, fqn)
         if status != "OK":
             body = f"{fqn}: {status}\n{output}"
-        else:
-            body = f"{fqn}\n" + "\n".join(filter_members(output, keep))
-        (BLOCKS_DIR / f"{block_index:02d}-{fqn}.txt").write_text(body + "\n", encoding="utf-8")
+            (BLOCKS_DIR / f"{block_index:02d}-{fqn}.txt").write_text(body + "\n", encoding="utf-8")
+            continue
+        members = filter_members(output, keep)
+        # GitHub truncates annotation messages at 4096 characters, so every
+        # class is written in small chunks.
+        chunk: list[str] = []
+        size = 0
+        part = 1
+        for member in members:
+            if chunk and size + len(member) > 2500:
+                (BLOCKS_DIR / f"{block_index:02d}-{fqn}.p{part}.txt").write_text(
+                    f"{fqn} (part {part})\n" + "\n".join(chunk) + "\n", encoding="utf-8")
+                chunk = []
+                size = 0
+                part += 1
+            chunk.append(member)
+            size += len(member) + 1
+        if chunk:
+            (BLOCKS_DIR / f"{block_index:02d}-{fqn}.p{part}.txt").write_text(
+                f"{fqn} (part {part})\n" + "\n".join(chunk) + "\n", encoding="utf-8")
 
     OUT_FILE.write_text("\n".join(report) + "\n", encoding="utf-8")
     REPORT_FILE.write_text("\n".join(report) + "\n", encoding="utf-8")
