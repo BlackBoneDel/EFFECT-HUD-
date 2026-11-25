@@ -64,7 +64,7 @@ public final class EffectTimerMod implements ClientModInitializer {
 	public void onInitializeClient() {
 		getConfigManager();
 
-		ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloader(
+		ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloadListener(
 				Identifier.fromNamespaceAndPath(MOD_ID, "i18n_reloader"),
 				(ResourceManagerReloadListener) ModI18n::reloadFromResources
 		);
@@ -107,9 +107,9 @@ public final class EffectTimerMod implements ClientModInitializer {
 		// HudElementRegistry.replaceElement ya permite envolver el elemento.
 		HudElementRegistry.replaceElement(
 				VanillaHudElements.MOB_EFFECTS,
-				vanilla -> (graphics, tickCounter) -> {
+				vanilla -> (graphics, deltaTracker) -> {
 					if (VisibilityRules.shouldRenderVanillaEffects(getConfig())) {
-						vanilla.render(graphics, tickCounter);
+						vanilla.extractRenderState(graphics, deltaTracker);
 					}
 				}
 		);

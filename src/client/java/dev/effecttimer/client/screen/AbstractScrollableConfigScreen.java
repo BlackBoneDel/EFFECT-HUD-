@@ -5,7 +5,7 @@ import dev.effecttimer.layout.HudRect;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -256,11 +256,11 @@ public abstract class AbstractScrollableConfigScreen extends AbstractCustomizabl
 		return null;
 	}
 
-	protected void renderPreviewPanel(GuiGraphics graphics, HudRect previewBox) {
+	protected void renderPreviewPanel(GuiGraphicsExtractor graphics, HudRect previewBox) {
 	}
 
 	@Override
-	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
 		int top = bodyTop();
 		int bottom = bodyBottom();
 		int bodyAreaRight = isSidePreviewLayout() ? (contentLeftX() + contentPanelWidth() + 8) : this.width;
@@ -274,7 +274,7 @@ public abstract class AbstractScrollableConfigScreen extends AbstractCustomizabl
 			int drawY = top + label.baseY() - scrollOffset;
 			if (drawY + 12 >= top && drawY <= bottom) {
 				if (label.underline()) {
-					graphics.drawString(this.font, label.text(), label.x(), drawY, 0xFF7FD4E6, true);
+					graphics.text(this.font, label.text(), label.x(), drawY, 0xFF7FD4E6, true);
 					graphics.fill(label.x(), drawY + 10, Math.min(bodyAreaRight - 14, label.x() + contentPanelWidth()), drawY + 11, 0x447FD4E6);
 				} else {
 					String raw = label.text().getString();
@@ -282,14 +282,14 @@ public abstract class AbstractScrollableConfigScreen extends AbstractCustomizabl
 					if (this.font.width(raw) > maxW) {
 						raw = this.font.plainSubstrByWidth(raw, maxW - 6) + "...";
 					}
-					graphics.drawString(this.font, raw, label.x(), drawY, 0xFF94A3B8, false);
+					graphics.text(this.font, raw, label.x(), drawY, 0xFF94A3B8, false);
 				}
 			}
 		}
 		for (ScrollWidgetEntry entry : scrollWidgets) {
 			AbstractWidget widget = entry.widget();
 			if (widget.getBottom() >= top && widget.getY() <= bottom) {
-				widget.render(graphics, bodyMouseX, bodyMouseY, partialTick);
+				widget.extractRenderState(graphics, bodyMouseX, bodyMouseY, partialTick);
 			}
 		}
 		graphics.disableScissor();
@@ -306,11 +306,11 @@ public abstract class AbstractScrollableConfigScreen extends AbstractCustomizabl
 		HudRect pBox = previewRect();
 		if (canShowPreview() && !pBox.isEmpty()) {
 			graphics.fill(pBox.x(), pBox.y(), pBox.right(), pBox.bottom(), 0xAA0B1017);
-			graphics.renderOutline(pBox.x(), pBox.y(), pBox.width(), pBox.height(), 0xFF334155);
+			graphics.outline(pBox.x(), pBox.y(), pBox.width(), pBox.height(), 0xFF334155);
 			renderPreviewPanel(graphics, pBox);
 		}
 
 		renderHeaderAndFooterChrome(graphics, HEADER_HEIGHT, this.height - FOOTER_HEIGHT, subtitleText());
-		super.render(graphics, mouseX, mouseY, partialTick);
+		super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 	}
 }

@@ -24,8 +24,8 @@ import java.util.List;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.core.Holder;
@@ -42,7 +42,7 @@ public final class EffectsHudRenderer {
 	private EffectsHudRenderer() {
 	}
 
-	public static void renderLive(GuiGraphics graphics, DeltaTracker deltaTracker) {
+	public static void renderLive(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
 		Minecraft client = Minecraft.getInstance();
 		HudConfig config = EffectTimerMod.getConfig();
 		if (config == null || !VisibilityRules.shouldRenderCustomEffects(config)) {
@@ -55,7 +55,7 @@ public final class EffectsHudRenderer {
 	}
 
 	public static EffectsLayoutResult renderForEditor(
-			GuiGraphics graphics,
+			GuiGraphicsExtractor graphics,
 			Minecraft client,
 			EffectsConfig effectsConfig,
 			ModLanguage language,
@@ -65,7 +65,7 @@ public final class EffectsHudRenderer {
 	}
 
 	public static void renderPreviewInBox(
-			GuiGraphics graphics,
+			GuiGraphicsExtractor graphics,
 			Minecraft client,
 			EffectsConfig effectsConfig,
 			ModLanguage language,
@@ -103,7 +103,7 @@ public final class EffectsHudRenderer {
 	 * reales.
 	 */
 	public static void renderPreviewEntries(
-			GuiGraphics graphics,
+			GuiGraphicsExtractor graphics,
 			Minecraft client,
 			EffectsConfig effectsConfig,
 			ModLanguage language,
@@ -219,7 +219,7 @@ public final class EffectsHudRenderer {
 	}
 
 	private static EffectsLayoutResult render(
-			GuiGraphics graphics,
+			GuiGraphicsExtractor graphics,
 			Minecraft client,
 			EffectsConfig config,
 			ModLanguage language,
@@ -261,7 +261,7 @@ public final class EffectsHudRenderer {
 	}
 
 	private static void drawRow(
-			GuiGraphics graphics,
+			GuiGraphicsExtractor graphics,
 			Font font,
 			EffectsConfig config,
 			EffectsVisualStyle style,
@@ -305,7 +305,7 @@ public final class EffectsHudRenderer {
 					int border = snap.ambient()
 							? ARGB.colorFromFloat(0.75f * alpha, 0.35f, 0.65f, 0.85f)
 							: ARGB.colorFromFloat(0.68f * alpha, 0.25f, 0.30f, 0.38f);
-					graphics.renderOutline(x, y, w, h, border);
+					graphics.outline(x, y, w, h, border);
 				}
 			}
 			case CLEAN_CARD -> {
@@ -315,7 +315,7 @@ public final class EffectsHudRenderer {
 				}
 				if (drawBorder) {
 					int border = ARGB.colorFromFloat(0.55f * alpha, 0.22f, 0.27f, 0.35f);
-					graphics.renderOutline(x, y, w, h, border);
+					graphics.outline(x, y, w, h, border);
 				}
 				// El acento lateral es decorativo (no es marco): se mantiene
 				// aunque no haya fondo ni borde .
@@ -329,7 +329,7 @@ public final class EffectsHudRenderer {
 				}
 				if (drawBorder) {
 					int border = ARGB.colorFromFloat(0.55f * alpha, 0.35f, 0.42f, 0.54f);
-					graphics.renderOutline(x, y, w, h, border);
+					graphics.outline(x, y, w, h, border);
 				}
 			}
 			case POTION_HUD -> {
@@ -362,28 +362,28 @@ public final class EffectsHudRenderer {
 			int textY = y + Math.max(0, (h - font.lineHeight) / 2);
 			int cursorX = textX;
 			if (!title.isEmpty()) {
-				graphics.drawString(font, title, cursorX, textY, titleColor, shadow);
+				graphics.text(font, title, cursorX, textY, titleColor, shadow);
 				cursorX += font.width(title) + 6;
 			}
 			if (!duration.isEmpty()) {
-				graphics.drawString(font, duration, cursorX, textY, durationColor, shadow);
+				graphics.text(font, duration, cursorX, textY, durationColor, shadow);
 			}
 		} else {
 			int lines = (title.isEmpty() ? 0 : 1) + (duration.isEmpty() ? 0 : 1);
 			int textBlockH = lines == 2 ? (font.lineHeight * 2 + 1) : font.lineHeight;
 			int textY = y + Math.max(0, (h - textBlockH) / 2);
 			if (!title.isEmpty()) {
-				graphics.drawString(font, title, textX, textY, titleColor, shadow);
+				graphics.text(font, title, textX, textY, titleColor, shadow);
 				textY += font.lineHeight + 1;
 			}
 			if (!duration.isEmpty()) {
-				graphics.drawString(font, duration, textX, textY, durationColor, shadow);
+				graphics.text(font, duration, textX, textY, durationColor, shadow);
 			}
 		}
 	}
 
 	private static void drawPotionHudRow(
-			GuiGraphics graphics,
+			GuiGraphicsExtractor graphics,
 			Font font,
 			EffectsConfig config,
 			PreparedRow row,
@@ -411,7 +411,7 @@ public final class EffectsHudRenderer {
 			int border = snap.ambient()
 					? ARGB.colorFromFloat(0.75f * alpha, 0.35f, 0.65f, 0.85f)
 					: ARGB.colorFromFloat(0.58f * alpha, 0.24f, 0.30f, 0.39f);
-			graphics.renderOutline(x, y, w, h, border);
+			graphics.outline(x, y, w, h, border);
 		}
 
 		int accentArgb = ARGB.multiplyAlpha(EffectsColorResolver.accentColorArgb(snap, config), alpha);
@@ -436,7 +436,7 @@ public final class EffectsHudRenderer {
 					try {
 						pose.translate(iconX + 16, iconY + 10);
 						pose.scale(lvlScale, lvlScale);
-						graphics.drawString(font, row.levelPart(), -lvlW, 0, titleColor, shadow);
+						graphics.text(font, row.levelPart(), -lvlW, 0, titleColor, shadow);
 					} finally {
 						pose.popMatrix();
 					}
@@ -449,7 +449,7 @@ public final class EffectsHudRenderer {
 				try {
 					pose.translate(x + (w / 2.0f), y + padY);
 					pose.scale(lvlScale, lvlScale);
-					graphics.drawString(font, row.levelPart(), -Math.round(lvlW / 2.0f), 0, titleColor, shadow);
+					graphics.text(font, row.levelPart(), -Math.round(lvlW / 2.0f), 0, titleColor, shadow);
 				} finally {
 					pose.popMatrix();
 				}
@@ -470,7 +470,7 @@ public final class EffectsHudRenderer {
 					try {
 						pose.translate(x + (w / 2.0f), durY);
 						pose.scale(durScale, durScale);
-						graphics.drawString(font, row.duration(), -Math.round(durW / 2.0f), 0, durationColor, shadow);
+						graphics.text(font, row.duration(), -Math.round(durW / 2.0f), 0, durationColor, shadow);
 					} finally {
 						pose.popMatrix();
 					}
@@ -501,16 +501,16 @@ public final class EffectsHudRenderer {
 		int textBlockH = lines == 2 ? (font.lineHeight * 2 + 1) : font.lineHeight;
 		int textY = y + Math.max(0, (h - textBlockH) / 2);
 		if (!title.isEmpty()) {
-			graphics.drawString(font, title, textX, textY, titleColor, shadow);
+			graphics.text(font, title, textX, textY, titleColor, shadow);
 			textY += font.lineHeight + 1;
 		}
 		if (!duration.isEmpty()) {
-			graphics.drawString(font, duration, textX, textY, durationColor, shadow);
+			graphics.text(font, duration, textX, textY, durationColor, shadow);
 		}
 	}
 
 	private static void drawPotionDurationBar(
-			GuiGraphics graphics,
+			GuiGraphicsExtractor graphics,
 			int x,
 			int y,
 			int w,
@@ -549,7 +549,7 @@ public final class EffectsHudRenderer {
 	}
 
 	private static void drawEffectIcon(
-			GuiGraphics graphics,
+			GuiGraphicsExtractor graphics,
 			Holder<MobEffect> holder,
 			EffectSnapshot snap,
 			int x,
@@ -558,7 +558,7 @@ public final class EffectsHudRenderer {
 			float alpha
 	) {
 		if (holder != null && holder.unwrapKey().isPresent()) {
-			Identifier sprite = Gui.getMobEffectSprite(holder);
+			Identifier sprite = Hud.getMobEffectSprite(holder);
 			if (!MissingTextureAtlasSprite.getLocation().equals(sprite)) {
 				// Never tint registered mob effect sprites; keep original texture colors intact.
 				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, size, size, EffectsColorResolver.iconTintArgb(alpha));
@@ -568,7 +568,7 @@ public final class EffectsHudRenderer {
 		int fill = ARGB.color(alpha, ARGB.opaque(EffectsColorResolver.resolveNativeDisplayRgb(snap.colorRgb())));
 		int border = ARGB.color(alpha, 0xFFFFFFFF);
 		graphics.fill(x + 1, y + 1, x + size - 1, y + size - 1, fill);
-		graphics.renderOutline(x + 1, y + 1, size - 2, size - 2, border);
+		graphics.outline(x + 1, y + 1, size - 2, size - 2, border);
 	}
 
 	private static float computeLowDurationFade(EffectsConfig config, EffectSnapshot snap) {

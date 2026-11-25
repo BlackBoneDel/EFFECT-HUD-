@@ -8,6 +8,7 @@ import dev.effecttimer.config.VisibilityConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.PauseScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 
 public final class VisibilityRules {
@@ -18,22 +19,24 @@ public final class VisibilityRules {
 		if (client == null || config == null) {
 			return false;
 		}
-		if (client.options.hideGui) {
+		// Desde 26.2 el estado "ocultar HUD" vive en el Hud, no en las Options.
+		if (client.gui.hud.isHidden()) {
 			return false;
 		}
 		if (config.requireActiveWorld && (client.player == null || client.level == null)) {
 			return false;
 		}
-		if (client.screen instanceof HudEditorScreen || client.screen instanceof AbstractCustomizableScreen) {
+		Screen currentScreen = client.gui.screen();
+		if (currentScreen instanceof HudEditorScreen || currentScreen instanceof AbstractCustomizableScreen) {
 			return false;
 		}
-		if (config.hideInInventory && client.screen instanceof AbstractContainerScreen<?>) {
+		if (config.hideInInventory && currentScreen instanceof AbstractContainerScreen<?>) {
 			return false;
 		}
-		if (config.hideInChat && client.screen instanceof ChatScreen) {
+		if (config.hideInChat && currentScreen instanceof ChatScreen) {
 			return false;
 		}
-		if (config.hideInPauseScreen && client.screen instanceof PauseScreen) {
+		if (config.hideInPauseScreen && currentScreen instanceof PauseScreen) {
 			return false;
 		}
 		return true;

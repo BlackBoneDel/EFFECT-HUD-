@@ -24,7 +24,7 @@ import java.util.Locale;
 import java.util.Map;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.Tooltip;
@@ -308,7 +308,7 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 		addScrollWidget(
 				Button.builder(
 						t("effecttimer.button.effect_colors"),
-						btn -> this.minecraft.setScreen(new EffectColorsScreen(this, workingConfig))
+						btn -> this.minecraft.gui.setScreen(new EffectColorsScreen(this, workingConfig))
 				).bounds(leftX, 0, panelW, 20)
 						.tooltip(Tooltip.create(t("effecttimer.tooltip.effect_colors")))
 						.build(),
@@ -541,7 +541,7 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 		addRenderableWidget(
 				Button.builder(
 						t("effecttimer.button.open_editor_short"),
-						btn -> this.minecraft.setScreen(new HudEditorScreen(this, workingConfig, updated -> {
+						btn -> this.minecraft.gui.setScreen(new HudEditorScreen(this, workingConfig, updated -> {
 							syncWorkingFromManager(updated);
 						}))
 				).bounds(footerX, footerY, btnW, 20)
@@ -583,11 +583,11 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 	}
 
 	@Override
-	protected void renderPreviewPanel(GuiGraphics graphics, HudRect previewBox) {
+	protected void renderPreviewPanel(GuiGraphicsExtractor graphics, HudRect previewBox) {
 		Component label = workingConfig.effects.enabled
 				? t("effecttimer.preview.title")
 				: t("effecttimer.preview.disabled");
-		graphics.drawCenteredString(this.font, label, previewBox.centerX(), previewBox.y() + 4,
+		graphics.centeredText(this.font, label, previewBox.centerX(), previewBox.y() + 4,
 				workingConfig.effects.enabled ? 0xFF7FD4E6 : 0xFFFBBF24);
 
 		int contentTop = previewBox.y() + 15;
@@ -674,6 +674,6 @@ public final class EffectsConfigScreen extends AbstractScrollableConfigScreen {
 	@Override
 	public void onClose() {
 		flushPendingOnExit();
-		this.minecraft.setScreen(parent);
+		this.minecraft.gui.setScreen(parent);
 	}
 }

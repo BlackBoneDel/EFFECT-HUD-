@@ -74,7 +74,7 @@ public final class MainConfigScreen extends AbstractScrollableConfigScreen {
 		addScrollWidget(
 				Button.builder(
 						t("effecttimer.button.configure_effects"),
-						btn -> this.minecraft.setScreen(new EffectsConfigScreen(this, workingConfig))
+						btn -> this.minecraft.gui.setScreen(new EffectsConfigScreen(this, workingConfig))
 				).bounds(rightX, 0, halfW, 20)
 						.tooltip(Tooltip.create(t("effecttimer.tooltip.configure_effects")))
 						.build(),
@@ -85,7 +85,7 @@ public final class MainConfigScreen extends AbstractScrollableConfigScreen {
 		addScrollWidget(
 				Button.builder(
 								t("effecttimer.button.open_editor"),
-								btn -> this.minecraft.setScreen(new HudEditorScreen(this, workingConfig, updated -> {
+								btn -> this.minecraft.gui.setScreen(new HudEditorScreen(this, workingConfig, updated -> {
 									syncWorkingFromManager(updated);
 								}))
 						)
@@ -231,6 +231,6 @@ public final class MainConfigScreen extends AbstractScrollableConfigScreen {
 	@Override
 	public void onClose() {
 		flushPendingOnExit();
-		this.minecraft.setScreen(parent);
+		this.minecraft.gui.setScreen(parent);
 	}
 }

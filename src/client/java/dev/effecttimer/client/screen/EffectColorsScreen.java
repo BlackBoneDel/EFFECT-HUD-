@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
@@ -283,9 +283,16 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 		int applyW = Math.max(52, Math.min(72, rw / 4));
 		int hexW = Math.max(60, rw - resetW - applyW - 8);
 
-		hexEditBox = addRenderableWidget(new EditBox(this.font, rx, y, hexW, 18, t("effecttimer.effect_colors.hex_label")));
+		hexEditBox = addRenderableWidget(new FilteredEditBox(
+				this.font,
+				rx,
+				y,
+				hexW,
+				18,
+				t("effecttimer.effect_colors.hex_label"),
+				text -> text.matches("#?[0-9a-fA-F]{0,6}")
+		));
 		hexEditBox.setMaxLength(7);
-		hexEditBox.setFilter(text -> text.matches("#?[0-9a-fA-F]{0,6}"));
 		hexEditBox.setTooltip(Tooltip.create(t("effecttimer.tooltip.effect_colors.hex")));
 		hexEditBox.setResponder(text -> {
 			if (suppressHexResponder) {
@@ -465,15 +472,15 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 	}
 
 	@Override
-	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
 		graphics.fill(0, HEADER_HEIGHT, this.width, this.height - FOOTER_HEIGHT, 0x66090D12);
 
 		renderEffectList(graphics, mouseX, mouseY);
 
 		if (!previewRect.isEmpty()) {
 			graphics.fill(previewRect.x(), previewRect.y(), previewRect.right(), previewRect.bottom(), 0xAA0B1017);
-			graphics.renderOutline(previewRect.x(), previewRect.y(), previewRect.width(), previewRect.height(), 0xFF334155);
-			graphics.drawCenteredString(this.font, t("effecttimer.preview.title"), previewRect.centerX(), previewRect.y() + 4, 0xFF7FD4E6);
+			graphics.outline(previewRect.x(), previewRect.y(), previewRect.width(), previewRect.height(), 0xFF334155);
+			graphics.centeredText(this.font, t("effecttimer.preview.title"), previewRect.centerX(), previewRect.y() + 4, 0xFF7FD4E6);
 			EffectsHudRenderer.renderPreviewInBox(
 					graphics,
 					this.minecraft,
@@ -497,36 +504,36 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 					? ColorHexUtils.parseRgb(ov.colorHex).orElse(sel.autoDisplayRgb())
 					: sel.autoDisplayRgb();
 			graphics.fill(sx, infoY, sx + 9, infoY + 9, 0xFF000000 | activeRgb);
-			graphics.renderOutline(sx, infoY, 9, 9, (ov != null && ov.enabled) ? 0xFFFFFFFF : 0xFF94A3B8);
+			graphics.outline(sx, infoY, 9, 9, (ov != null && ov.enabled) ? 0xFFFFFFFF : 0xFF94A3B8);
 
 			String infoText = sel.displayName() + " (" + sel.id() + ")";
 			int maxW = Math.max(40, toggleOverrideBtn.getWidth() - 14);
 			if (this.font.width(infoText) > maxW) {
 				infoText = this.font.plainSubstrByWidth(infoText, maxW - 8) + "...";
 			}
-			graphics.drawString(this.font, infoText, sx + 13, infoY + 1, 0xFFE2E8F0, false);
+			graphics.text(this.font, infoText, sx + 13, infoY + 1, 0xFFE2E8F0, false);
 		}
 
 		if (hexEditBox != null && hexInputInvalid) {
-			graphics.renderOutline(hexEditBox.getX() - 1, hexEditBox.getY() - 1, hexEditBox.getWidth() + 2, hexEditBox.getHeight() + 2, 0xFFEF4444);
+			graphics.outline(hexEditBox.getX() - 1, hexEditBox.getY() - 1, hexEditBox.getWidth() + 2, hexEditBox.getHeight() + 2, 0xFFEF4444);
 		} else if (hexEditBox != null && ColorHexUtils.isValidHex(hexEditBox.getValue())) {
 			int validRgb = ColorHexUtils.parseRgb(hexEditBox.getValue()).orElse(0xFFFFFF);
-			graphics.renderOutline(hexEditBox.getX() - 1, hexEditBox.getY() - 1, hexEditBox.getWidth() + 2, hexEditBox.getHeight() + 2, 0xFF000000 | validRgb);
+			graphics.outline(hexEditBox.getX() - 1, hexEditBox.getY() - 1, hexEditBox.getWidth() + 2, hexEditBox.getHeight() + 2, 0xFF000000 | validRgb);
 		}
 
 		renderHeaderAndFooterChrome(graphics, HEADER_HEIGHT, this.height - FOOTER_HEIGHT, t("effecttimer.screen.effect_colors.subtitle"));
-		super.render(graphics, mouseX, mouseY, partialTick);
+		super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 	}
 
-	private void renderEffectList(GuiGraphics graphics, int mouseX, int mouseY) {
+	private void renderEffectList(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		if (listRect.isEmpty()) {
 			return;
 		}
 		graphics.fill(listRect.x(), listRect.y(), listRect.right(), listRect.bottom(), 0xAA0B1017);
-		graphics.renderOutline(listRect.x(), listRect.y(), listRect.width(), listRect.height(), 0xFF334155);
+		graphics.outline(listRect.x(), listRect.y(), listRect.width(), listRect.height(), 0xFF334155);
 
 		if (filteredEntries.isEmpty()) {
-			graphics.drawCenteredString(this.font, t("effecttimer.effect_colors.empty"), listRect.centerX(), listRect.y() + 12, 0xFF94A3B8);
+			graphics.centeredText(this.font, t("effecttimer.effect_colors.empty"), listRect.centerX(), listRect.y() + 12, 0xFF94A3B8);
 			return;
 		}
 
@@ -547,7 +554,7 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 				int rowBg = selected ? 0xCC1E3A5F : (hovered ? 0x881E293B : 0x55111827);
 				graphics.fill(rowX, rowY, rowX + rowW, rowBottom, rowBg);
 				if (selected) {
-					graphics.renderOutline(rowX, rowY, rowW, LIST_ROW_HEIGHT - 2, 0xFF38BDF8);
+					graphics.outline(rowX, rowY, rowW, LIST_ROW_HEIGHT - 2, 0xFF38BDF8);
 				}
 
 				int iconX = rowX + 3;
@@ -561,13 +568,13 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 				if (this.font.width(title) > maxTextW) {
 					title = this.font.plainSubstrByWidth(title, maxTextW - 6) + "...";
 				}
-				graphics.drawString(this.font, title, textX, rowY + 2, 0xFFF1F5F9, false);
+				graphics.text(this.font, title, textX, rowY + 2, 0xFFF1F5F9, false);
 
 				String sub = entry.id() + (entry.registered() ? "" : " *");
 				if (this.font.width(sub) > maxTextW) {
 					sub = this.font.plainSubstrByWidth(sub, maxTextW - 6) + "...";
 				}
-				graphics.drawString(this.font, sub, textX, rowY + 12, 0xFF94A3B8, false);
+				graphics.text(this.font, sub, textX, rowY + 12, 0xFF94A3B8, false);
 
 				EffectColorOverride ov = workingConfig.effects != null && workingConfig.effects.customEffectColors != null
 						? workingConfig.effects.customEffectColors.get(entry.id())
@@ -578,28 +585,28 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 					int rgb = ColorHexUtils.parseRgb(ov.colorHex).orElse(entry.autoDisplayRgb());
 					if (ov.enabled && workingConfig.effects != null && workingConfig.effects.customColorsEnabled) {
 						graphics.fill(sx, sy, sx + 9, sy + 9, 0xFF000000 | rgb);
-						graphics.renderOutline(sx, sy, 9, 9, 0xFFFFFFFF);
+						graphics.outline(sx, sy, 9, 9, 0xFFFFFFFF);
 					} else if (ov.enabled) {
 						// override guardado pero interruptor global apagado: atenuado
 						graphics.fill(sx, sy, sx + 9, sy + 9, ARGB.multiplyAlpha(0xFF000000 | rgb, 0.45f));
-						graphics.renderOutline(sx, sy, 9, 9, 0xFF64748B);
+						graphics.outline(sx, sy, 9, 9, 0xFF64748B);
 					} else {
 						// pausado: color automático + tachado (el hex se conserva)
 						graphics.fill(sx, sy, sx + 9, sy + 9, 0xFF000000 | entry.autoDisplayRgb());
-						graphics.renderOutline(sx, sy, 9, 9, 0xFF64748B);
+						graphics.outline(sx, sy, 9, 9, 0xFF64748B);
 						graphics.fill(sx, sy + 4, sx + 9, sy + 5, 0xFF94A3B8);
 					}
 				} else {
 					// Automatic Minecraft effect color indicator
 					graphics.fill(sx, sy, sx + 9, sy + 9, 0xFF000000 | entry.autoDisplayRgb());
-					graphics.renderOutline(sx, sy, 9, 9, 0xFF475569);
+					graphics.outline(sx, sy, 9, 9, 0xFF475569);
 				}
 				// casilla por fila: activo, pausado o ninguno
 				int[] tgl = rowToggleRect(rowX, rowW, rowY);
 				graphics.fill(tgl[0], tgl[1], tgl[0] + tgl[2], tgl[1] + tgl[3], 0x33000000);
-				graphics.renderOutline(tgl[0], tgl[1], tgl[2], tgl[3], ov != null && ov.enabled ? 0xFF38BDF8 : 0xFF475569);
+				graphics.outline(tgl[0], tgl[1], tgl[2], tgl[3], ov != null && ov.enabled ? 0xFF38BDF8 : 0xFF475569);
 				String mark = ov == null ? "\u00B7" : (ov.enabled ? "\u2713" : "\u2013");
-				graphics.drawString(this.font, mark, tgl[0] + 1, tgl[1] + 1,
+				graphics.text(this.font, mark, tgl[0] + 1, tgl[1] + 1,
 						ov != null && ov.enabled ? 0xFFBAE6FD : 0xFF94A3B8, false);
 			}
 		} finally {
@@ -619,16 +626,16 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 		}
 	}
 
-	private static void drawSmallIcon(GuiGraphics graphics, EffectEntry entry, int x, int y) {
+	private static void drawSmallIcon(GuiGraphicsExtractor graphics, EffectEntry entry, int x, int y) {
 		if (entry.holder() != null && entry.holder().unwrapKey().isPresent()) {
-			Identifier sprite = Gui.getMobEffectSprite(entry.holder());
+			Identifier sprite = Hud.getMobEffectSprite(entry.holder());
 			if (!MissingTextureAtlasSprite.getLocation().equals(sprite)) {
 				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, 16, 16, ARGB.white(1.0f));
 				return;
 			}
 		}
 		graphics.fill(x + 2, y + 2, x + 14, y + 14, 0xFF000000 | (entry.autoDisplayRgb() & 0xFFFFFF));
-		graphics.renderOutline(x + 2, y + 2, 12, 12, 0xFFFFFFFF);
+		graphics.outline(x + 2, y + 2, 12, 12, 0xFFFFFFFF);
 	}
 
 	@Override
@@ -717,6 +724,6 @@ public final class EffectColorsScreen extends AbstractCustomizableScreen {
 	@Override
 	public void onClose() {
 		flushPendingOnExit();
-		this.minecraft.setScreen(parent);
+		this.minecraft.gui.setScreen(parent);
 	}
 }

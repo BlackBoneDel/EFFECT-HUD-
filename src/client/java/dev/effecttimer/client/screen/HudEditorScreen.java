@@ -11,7 +11,7 @@ import dev.effecttimer.layout.HudLayoutEngine;
 import dev.effecttimer.layout.HudRect;
 import java.util.List;
 import java.util.function.Consumer;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
@@ -159,7 +159,7 @@ public final class HudEditorScreen extends AbstractCustomizableScreen {
 		doneBtn = Button.builder(t("effecttimer.button.done"), btn -> {
 			saveConfigNow();
 			syncParent();
-			this.minecraft.setScreen(parent);
+			this.minecraft.gui.setScreen(parent);
 		}).bounds(rx - rightBtnW, rowY, rightBtnW, 20).build();
 		addRenderableWidget(doneBtn);
 		rx -= rightBtnW + gap;
@@ -243,7 +243,7 @@ public final class HudEditorScreen extends AbstractCustomizableScreen {
 		syncWorkingFromManager(entrySnapshot.copy());
 		notifyConfigEdited();
 		syncParent();
-		this.minecraft.setScreen(parent);
+		this.minecraft.gui.setScreen(parent);
 	}
 
 	private void syncParent() {
@@ -253,8 +253,8 @@ public final class HudEditorScreen extends AbstractCustomizableScreen {
 	}
 
 	@Override
-	public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-		this.renderBackground(graphics, mouseX, mouseY, delta);
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+		this.extractBackground(graphics, mouseX, mouseY, delta);
 
 		lastEffectsLayout = EffectsHudRenderer.renderForEditor(
 				graphics,
@@ -279,7 +279,7 @@ public final class HudEditorScreen extends AbstractCustomizableScreen {
 		}
 
 		if (!bounds.isEmpty()) {
-			graphics.renderOutline(bounds.x() - 2, bounds.y() - 2, bounds.width() + 4, bounds.height() + 4, 0x9938BDF8);
+			graphics.outline(bounds.x() - 2, bounds.y() - 2, bounds.width() + 4, bounds.height() + 4, 0x9938BDF8);
 			drawHandle(graphics, bounds.x() - 2, bounds.y() - 2);
 			drawHandle(graphics, bounds.right() + 2, bounds.y() - 2);
 			drawHandle(graphics, bounds.x() - 2, bounds.bottom() + 2);
@@ -291,18 +291,18 @@ public final class HudEditorScreen extends AbstractCustomizableScreen {
 		int panelX = toolbarX(panelW);
 		int panelY = toolbarY();
 		graphics.fill(panelX, panelY, panelX + panelW, panelY + computedToolbarHeight, 0xE60D1117);
-		graphics.renderOutline(panelX, panelY, panelW, computedToolbarHeight, 0xFF2D3748);
+		graphics.outline(panelX, panelY, panelW, computedToolbarHeight, 0xFF2D3748);
 
 		Component hint = t("effecttimer.editor.hint");
-		graphics.drawCenteredString(this.font, hint, this.width / 2, panelY - 14, 0xFFA0AEC0);
+		graphics.centeredText(this.font, hint, this.width / 2, panelY - 14, 0xFFA0AEC0);
 
-		super.render(graphics, mouseX, mouseY, delta);
+		super.extractRenderState(graphics, mouseX, mouseY, delta);
 		renderSaveStatusBadge(graphics, panelX + panelW + 8, panelY + 3);
 	}
 
-	private void drawHandle(GuiGraphics graphics, int cx, int cy) {
+	private void drawHandle(GuiGraphicsExtractor graphics, int cx, int cy) {
 		graphics.fill(cx - 2, cy - 2, cx + 3, cy + 3, 0xFFF8FAFC);
-		graphics.renderOutline(cx - 2, cy - 2, 5, 5, 0xFF0D1117);
+		graphics.outline(cx - 2, cy - 2, 5, 5, 0xFF0D1117);
 	}
 
 	private HudLayoutEngine.ResizeCorner cornerAt(HudRect bounds, double mouseX, double mouseY) {
@@ -479,6 +479,6 @@ public final class HudEditorScreen extends AbstractCustomizableScreen {
 	public void onClose() {
 		flushPendingOnExit();
 		syncParent();
-		this.minecraft.setScreen(parent);
+		this.minecraft.gui.setScreen(parent);
 	}
 }

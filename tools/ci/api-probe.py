@@ -99,6 +99,15 @@ JAVAP_TARGETS = [
     ("net.minecraft.locale.Language", r"loadFromJson"),
     ("net.minecraft.server.packs.PackType", None),
     ("net.minecraft.client.gui.GuiGraphicsExtractor", r"blitSprite|fill|outline|text|centeredText"),
+    ("net.minecraft.client.OptionInstance$TooltipSupplier", None),
+    ("net.minecraft.client.gui.components.CycleButton$OnValueChange", None),
+    ("net.minecraft.client.gui.components.CycleButton$ValueListSupplier", None),
+    ("net.minecraft.server.packs.resources.Resource", None),
+    ("net.minecraft.client.gui.components.AbstractWidget$WithInactiveMessage", None),
+    ("net.minecraft.client.gui.GuiGraphicsExtractor$ScissorStack", None),
+    ("net.minecraft.world.effect.MobEffectInstance", r"getEffect|getAmplifier|getDuration|isInfinite|getCategory"),
+    ("net.minecraft.world.effect.MobEffect", r"getDescriptionId|getDisplayName|getColor|getCategory"),
+    ("net.minecraft.core.registries.BuiltInRegistries", None),
 ]
 
 
