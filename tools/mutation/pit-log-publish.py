@@ -41,6 +41,25 @@ def split(text: str) -> list[str]:
     return chunks
 
 
+def head_and_tail(text: str) -> list[str]:
+    """Keep the beginning and the end of a long log.
+
+    A verbose PIT run produces megabytes of output, but the interesting parts
+    are the startup of the minion (head) and the failure (tail).
+    """
+    lines = text.splitlines()
+    if len(text) <= MAX_CHUNK * 2:
+        return split(text)
+    head = lines[:400]
+    tail = lines[-400:]
+    skipped = len(lines) - len(head) - len(tail)
+    return [
+        "\n".join(head),
+        f"... {skipped} lines skipped ...",
+        "\n".join(tail),
+    ]
+
+
 def write_summary(text: str) -> None:
     summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary_path:
@@ -104,8 +123,8 @@ def main(argv: list[str]) -> int:
         print(f"pit-log-publish: {path} does not exist")
         return 0
     text = path.read_text(encoding="utf-8", errors="replace")
-    write_summary(text)
-    chunks = split(text)
+    chunks = head_and_tail(text)
+    write_summary("\n\n".join(chunks))
     print(f"pit-log-publish: {len(text)} characters in {len(chunks)} chunk(s)")
     return publish(chunks)
 

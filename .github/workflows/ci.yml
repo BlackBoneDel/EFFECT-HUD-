@@ -186,6 +186,9 @@ jobs:
       GITHUB_TOKEN: ${{ github.token }}
       PIT_HEAD_SHA: ${{ github.sha }}
       PIT_DETAILS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      # Temporary: shows the output of the PIT minion process, which is where
+      # the stack traces of a crashing minion end up.
+      PIT_VERBOSITY: VERBOSE_NO_SPINNER
     steps:
       - name: Check out the repository
         uses: actions/checkout@v5

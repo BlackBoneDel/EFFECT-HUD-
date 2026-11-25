@@ -55,6 +55,10 @@ allprojects { Project p ->
         ext.outputFormats.set(['HTML', 'XML'] as Set)
         ext.timestampedReports.set(false)
         ext.verbose.set(false)
+        // "NO_SPINNER" hides the output of the minion process. Set PIT_VERBOSITY
+        // to VERBOSE_NO_SPINNER to see it (the stack traces of a crashing
+        // minion are written to its standard output).
+        ext.verbosity.set(System.getenv('PIT_VERBOSITY') ?: 'NO_SPINNER')
         // Pure logic only: formatting, config, layout and color helpers.
         // None of these packages references Minecraft directly.
         ext.targetClasses.set([
@@ -62,7 +66,11 @@ allprojects { Project p ->
             'dev.effecttimer.config.*',
             'dev.effecttimer.layout.*'
         ] as Set)
-        ext.targetTests.set(['dev.effecttimer.*'] as Set)
+        // Only the test classes. A wider glob ("dev.effecttimer.*") would also
+        // match the classes of the mod itself, and PIT loads every class it
+        // sends to the minion - including the client screens, which need a
+        // running Minecraft to be initialized.
+        ext.targetTests.set(['dev.effecttimer.*Test'] as Set)
 
         // Loom splits the source sets: every source file of this mod lives in
         // "src/client/java", so the client source set is the one PIT has to
