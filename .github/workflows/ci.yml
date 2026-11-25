@@ -178,8 +178,10 @@ jobs:
 
   mutation:
     if: github.event_name == 'workflow_dispatch'
-    continue-on-error: true
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
     steps:
       - name: Check out the repository
         uses: actions/checkout@v5
@@ -197,7 +199,7 @@ jobs:
       - name: Run PIT
         run: |
           set +e
-          ./gradlew pitest -I tools/mutation/pitest.init.gradle --no-daemon > pit.log 2>&1
+          ./gradlew pitest -I tools/mutation/pitest.init.gradle --no-daemon --console=plain > pit.log 2>&1
           code=$?
           set -e
           python3 - <<'PY'
@@ -209,14 +211,23 @@ jobs:
           PY
           exit $code
 
+      - name: Upload the PIT log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pitest-log
+          path: pit.log
+          if-no-files-found: warn
+
       - name: Summarize mutation results per package
         if: always()
         run: |
           python3 - <<'PY'
-          import collections, glob, xml.etree.ElementTree as ET
+          import collections, glob, sys, xml.etree.ElementTree as ET
           files = glob.glob('build/reports/pitest/**/mutations.xml', recursive=True)
           if not files:
-              print('::notice title=PIT::no mutations.xml found')
+              print('::error title=PIT::no mutations.xml was produced')
+              sys.exit(1)
           for path in files:
               stats = collections.defaultdict(lambda: collections.Counter())
               for m in ET.parse(path).getroot().iter('mutation'):
