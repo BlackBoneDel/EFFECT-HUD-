@@ -35,7 +35,7 @@ jobs:
       - name: Run tests and build the mod jar
         run: |
           set +e
-          ./gradlew --no-daemon --console=plain test jar > /tmp/gradle.log 2>&1
+          ./gradlew --no-daemon --console=plain --stacktrace test jar > /tmp/gradle.log 2>&1
           code=$?
           set -e
           python3 tools/ci/compile-diagnostics.py /tmp/gradle.log
