@@ -1,13 +1,16 @@
 // Mutation testing setup, applied only with:
 //   ./gradlew pitest -I tools/mutation/pitest.init.gradle
 // The normal build (build, test) never loads this file.
+//
+// gradle-pitest-plugin 1.19.0 is the first release with Gradle 9 support;
+// 1.15.0 fails with "Extension of type 'PitestPluginExtension' does not exist".
 
 initscript {
     repositories {
         gradlePluginPortal()
     }
     dependencies {
-        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.15.0'
+        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.19.0'
     }
 }
 
@@ -15,8 +18,8 @@ allprojects { Project p ->
     p.apply plugin: info.solidsoft.gradle.pitest.PitestPlugin
 
     p.extensions.configure(info.solidsoft.gradle.pitest.PitestPluginExtension) { ext ->
-        ext.pitestVersion = '1.15.0'
-        ext.junit5PluginVersion = '1.2.1'
+        ext.pitestVersion = '1.22.1'
+        ext.junit5PluginVersion = '1.2.3'
         ext.threads = 2
         ext.timeoutFactor = 1.25
         ext.timeoutConstant = 4000
