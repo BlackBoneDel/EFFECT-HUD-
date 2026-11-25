@@ -67,7 +67,7 @@ allprojects { Project p ->
         // Loom splits the source sets: every source file of this mod lives in
         // "src/client/java", so the client source set is the one PIT has to
         // mutate, and the test source set is the one holding the tests.
-        def sourceSets = q.extensions.getByType(org.gradle.api.plugins.SourceSetContainer)
+        def sourceSets = q.extensions.getByType(org.gradle.api.tasks.SourceSetContainer)
         def clientSet = sourceSets.findByName('client')
         def testSet = sourceSets.findByName('test')
         if (clientSet == null || testSet == null) {
