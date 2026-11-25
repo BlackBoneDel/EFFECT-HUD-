@@ -11,22 +11,35 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      CI_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      CI_DETAILS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v5
 
-      - name: Set up JDK 21 (Temurin)
+      - name: Set up JDK 25 (Temurin)
         uses: actions/setup-java@v5
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'temurin'
           cache: 'gradle'
 
       - name: Grant execute permission to gradlew
         run: chmod +x ./gradlew
 
-      - name: Run tests and build the remapped mod jar
-        run: ./gradlew test remapJar --no-daemon
+      - name: Run tests and build the mod jar
+        run: |
+          set +e
+          ./gradlew --no-daemon --console=plain --stacktrace test jar > /tmp/gradle.log 2>&1
+          code=$?
+          set -e
+          python3 tools/ci/compile-diagnostics.py /tmp/gradle.log
+          exit $code
 
       - name: Count executed tests
         if: always()
@@ -54,7 +67,7 @@ jobs:
       - name: Upload temporary mod JAR (30 days)
         uses: actions/upload-artifact@v4
         with:
-          name: effect-hud-pr2-build
+          name: mod-jar
           path: |
             build/libs/*.jar
             !build/libs/*-sources.jar
@@ -64,16 +77,22 @@ jobs:
 
   mutation:
     if: github.event_name == 'workflow_dispatch'
-    continue-on-error: true
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      PIT_HEAD_SHA: ${{ github.sha }}
+      PIT_DETAILS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v5
 
-      - name: Set up JDK 21 (Temurin)
+      - name: Set up JDK 25 (Temurin)
         uses: actions/setup-java@v5
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'temurin'
           cache: 'gradle'
 
@@ -83,11 +102,10 @@ jobs:
       - name: Run PIT
         run: |
           set +e
-          ./gradlew pitest -I tools/mutation/pitest.init.gradle --no-daemon > pit.log 2>&1
+          ./gradlew pitest -I tools/mutation/pitest.init.gradle --no-daemon --console=plain --stacktrace > pit.log 2>&1
           code=$?
           set -e
           python3 - <<'PY'
-          import re
           text = open('pit.log', encoding='utf-8', errors='replace').read()
           idx = text.find('What went wrong')
           snippet = text[idx:idx + 1500] if idx >= 0 else text[-1500:]
@@ -95,14 +113,27 @@ jobs:
           PY
           exit $code
 
+      - name: Upload the PIT log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pitest-log
+          path: pit.log
+          if-no-files-found: warn
+
+      - name: Publish the PIT log
+        if: always()
+        run: python3 tools/mutation/pit-log-publish.py pit.log
+
       - name: Summarize mutation results per package
         if: always()
         run: |
           python3 - <<'PY'
-          import collections, glob, xml.etree.ElementTree as ET
+          import collections, glob, sys, xml.etree.ElementTree as ET
           files = glob.glob('build/reports/pitest/**/mutations.xml', recursive=True)
           if not files:
-              print('::notice title=PIT::no mutations.xml found')
+              print('::error title=PIT::no mutations.xml was produced')
+              sys.exit(1)
           for path in files:
               stats = collections.defaultdict(lambda: collections.Counter())
               for m in ET.parse(path).getroot().iter('mutation'):

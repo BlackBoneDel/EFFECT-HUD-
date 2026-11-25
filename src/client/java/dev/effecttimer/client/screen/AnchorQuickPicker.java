@@ -69,7 +69,7 @@ public final class AnchorQuickPicker {
 
 	/**
 	 * Variante en barra horizontal (editor visual): los bounds quedan
-	 * fijados en la creacion (mojmap 1.21.11 no expone setBounds en botones).
+	 * fijados en la creacion (el mojmap de 26.2 no expone setBounds en botones).
 	 */
 	public static List<Button> buildRow(HudAnchor current, Consumer<HudAnchor> onPick,
 			Function<String, Component> tr, int startX, int y, int gap, int buttonWidth, int buttonHeight) {

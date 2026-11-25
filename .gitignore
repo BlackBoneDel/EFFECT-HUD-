@@ -21,3 +21,7 @@ bin/
 # OS
 .DS_Store
 Thumbs.db
+
+# Python bytecode (CI probe helpers)
+__pycache__/
+*.pyc

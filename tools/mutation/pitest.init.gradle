@@ -1,49 +1,117 @@
 // Mutation testing setup, applied only with:
 //   ./gradlew pitest -I tools/mutation/pitest.init.gradle
 // The normal build (build, test) never loads this file.
+//
+// gradle-pitest-plugin 1.19.0 is the first release with Gradle 9 support.
+// It creates the "pitest" extension lazily, inside
+// `plugins.withType(JavaPlugin).configureEach { ... }`, so the extension does
+// not exist yet while the init script is evaluated. Configuring it eagerly
+// fails with:
+//   "Extension of type 'PitestPluginExtension' does not exist."
+// The configuration therefore has to wait until the project is evaluated.
+//
+// The same callback also registers the "pitest" task, so both the extension
+// and the task only exist once the Java plugin (applied by Fabric Loom) has
+// been applied - that happens while the project is evaluated.
 
 initscript {
     repositories {
         gradlePluginPortal()
+        mavenCentral()
     }
     dependencies {
-        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.15.0'
+        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.19.0'
     }
 }
 
 allprojects { Project p ->
     p.apply plugin: info.solidsoft.gradle.pitest.PitestPlugin
 
-    p.extensions.configure(info.solidsoft.gradle.pitest.PitestPluginExtension) { ext ->
-        ext.pitestVersion = '1.15.0'
-        ext.junit5PluginVersion = '1.2.1'
-        ext.threads = 2
-        ext.timeoutFactor = 1.25
-        ext.timeoutConstant = 4000
-        ext.outputFormats = ['HTML', 'XML']
-        ext.timestampedReports = false
-        ext.verbose = false
+    p.afterEvaluate { Project q ->
+        def ext = q.extensions.findByType(info.solidsoft.gradle.pitest.PitestPluginExtension)
+        if (ext == null) {
+            def names = []
+            try {
+                names = q.extensions.extensionsSchema.elements.collect { it.name }
+            } catch (Exception ignored) {
+                names = ['<unknown>']
+            }
+            throw new org.gradle.api.GradleException(
+                "The PIT extension was not created. Registered extensions: " + names)
+        }
+
+        // PIT 1.30.2 is the current release and ships ASM 9.11, which reads the
+        // class file format of Java 25 (major version 69) used by this mod -
+        // both for the classes under test and for the Minecraft jars on the
+        // classpath. The CLI options used by gradle-pitest-plugin 1.19.0
+        // (classPathFile, sourceDirs, mutableCodePaths, timeoutConst, ...) are
+        // all still accepted by 1.30.2.
+        ext.pitestVersion.set('1.30.2')
+        // JUnit 5 plugin, required because the test suite runs on the JUnit Platform.
+        ext.junit5PluginVersion.set('1.2.3')
+        ext.threads.set(2)
+        ext.timeoutFactor.set(new BigDecimal('2.0'))
+        ext.timeoutConstInMillis.set(10000)
+        ext.outputFormats.set(['HTML', 'XML'] as Set)
+        ext.timestampedReports.set(false)
+        ext.verbose.set(false)
+        // "NO_SPINNER" hides the output of the minion process. Set PIT_VERBOSITY
+        // to VERBOSE_NO_SPINNER to see it (the stack traces of a crashing
+        // minion are written to its standard output).
+        ext.verbosity.set(System.getenv('PIT_VERBOSITY') ?: 'NO_SPINNER')
         // Pure logic only: formatting, config, layout and color helpers.
-        ext.targetClasses = [
+        // None of these packages references Minecraft directly.
+        ext.targetClasses.set([
             'dev.effecttimer.format.*',
             'dev.effecttimer.config.*',
             'dev.effecttimer.layout.*'
-        ]
-        ext.targetTests = ['dev.effecttimer.*']
-    }
+        ] as Set)
+        // Only the test classes. A wider glob ("dev.effecttimer.*") would also
+        // match the classes of the mod itself, and PIT loads every class it
+        // sends to the minion - including the client screens, which need a
+        // running Minecraft to be initialized.
+        ext.targetTests.set(['dev.effecttimer.*Test'] as Set)
+        // The installation test needs Fabric Loader, which is not part of the
+        // PIT classpath (see below), so it is not part of the oracle.
+        ext.excludedTestClasses.set(['dev.effecttimer.ModInstallationTest'] as Set)
 
-    p.afterEvaluate { Project q ->
-        def clientSet = q.extensions.findByName('sourceSets') ? q.sourceSets.findByName('client') : null
-        if (clientSet == null) {
-            return
+        // Loom splits the source sets: every source file of this mod lives in
+        // "src/client/java", so the client source set is the one PIT has to
+        // mutate, and the test source set is the one holding the tests.
+        def sourceSets = q.extensions.getByType(org.gradle.api.tasks.SourceSetContainer)
+        def clientSet = sourceSets.findByName('client')
+        def testSet = sourceSets.findByName('test')
+        if (clientSet == null || testSet == null) {
+            throw new org.gradle.api.GradleException(
+                "Expected the Loom source sets 'client' and 'test', found: " + sourceSets.names)
         }
-        def ext = q.extensions.getByType(info.solidsoft.gradle.pitest.PitestPluginExtension)
-        def extra = clientSet.output.classesDirs
-        def current = ext.mutableCodePaths
-        if (current instanceof org.gradle.api.file.ConfigurableFileCollection) {
-            current.from(extra)
-        } else {
-            ext.mutableCodePaths = q.files(current, extra)
+        ext.mainSourceSets.set([clientSet] as Set)
+        ext.testSourceSets.set([testSet] as Set)
+
+        // The mutable classes have to be compiled before PIT analyses them.
+        q.tasks.named('pitest').configure { t ->
+            t.dependsOn(q.tasks.named('testClasses'))
+            def clientClasses = q.tasks.findByName('clientClasses')
+            if (clientClasses != null) {
+                t.dependsOn(clientClasses)
+            }
+
+            // fabric-loader-junit only ships a JUnit Platform session listener
+            // that starts Fabric Loader. PIT opens a new session for every test
+            // class, so the loader would be started again and again and the
+            // second start fails with "Duplicate setLauncher call!". The tests
+            // that PIT uses as oracle are pure logic and do not need the
+            // loader, so the jar is left out of the classpath PIT analyses
+            // (the installation test is excluded above).
+            t.additionalClasspath.setFrom(testSet.runtimeClasspath.filter { f ->
+                !f.name.startsWith('fabric-loader-junit')
+            })
+            t.additionalClasspath.from(clientSet.output.classesDirs)
         }
+
+        println("[pitest] PIT ${ext.pitestVersion.get()} | main source sets: " +
+            ext.mainSourceSets.get().collect { it.name } +
+            " | test source sets: " + ext.testSourceSets.get().collect { it.name } +
+            " | targets: " + ext.targetClasses.get().join(', '))
     }
 }

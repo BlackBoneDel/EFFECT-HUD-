@@ -1,7 +1,7 @@
 # Potion Effect — by Denvdrite
 
 HUD independiente para los efectos de poción de Minecraft, para Fabric
-(1.21.11). Muestra los efectos activos con su duración, nivel e icono, y deja
+(26.2). Muestra los efectos activos con su duración, nivel e icono, y deja
 ajustar el aspecto, la posición y los colores por efecto desde el juego.
 
 El id del mod (`effecttimer`), el paquete (`dev.effecttimer`) y el archivo de
@@ -12,11 +12,11 @@ configuración (`config/effecttimer.json`) se mantienen del nombre anterior
 
 Requisitos:
 
-- Minecraft 1.21.11
+- Minecraft 26.2
 - Fabric Loader 0.20.1 o superior
-- Fabric API 0.141.6+1.21.11
-- Java 21
-- Mod Menu (opcional, para abrir la configuración desde la lista de mods)
+- Fabric API 0.161.0+26.2
+- Java 25
+- Mod Menu 20.0.3 (opcional, para abrir la configuración desde la lista de mods)
 
 Copia `potion-effect-<versión>.jar` en la carpeta `mods` de tu instancia.
 
@@ -52,6 +52,20 @@ está en `docs/icon-preview.png`.
 
 El jar queda en `build/libs/potion-effect-<versión>.jar`. Los tests están en
 `src/test/java`.
+
+### Tests de mutación
+
+Además de los tests, hay una suite de *mutation testing* (PIT) que comprueba
+que los tests detectan los errores que dicen detectar:
+
+```bash
+./gradlew pitest -I tools/mutation/pitest.init.gradle
+```
+
+Solo analiza la lógica pura (`config`, `format` y `layout`), que es la parte
+del mod que no necesita Minecraft. El informe queda en
+`build/reports/pitest/mutations.xml`. En la CI se ejecuta con el workflow
+`CI` → `Run PIT`.
 
 ## Créditos y licencia
 

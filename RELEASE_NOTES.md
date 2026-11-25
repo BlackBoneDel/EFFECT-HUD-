@@ -35,11 +35,14 @@ funcionando.
 
 ## Calidad
 
-- 77 tests JUnit, que se ejecutan en CI.
+- 81 tests JUnit, que se ejecutan en CI.
+- Tests de mutación (PIT) sobre la lógica pura, que comprueban que los tests
+  detectan los errores que dicen detectar.
 - Migración de configuración probada de la versión 1 a la 3.
 - Lo que se verifica y lo que falta comprobar en el juego está en
   [`docs/VERIFICATION.md`](docs/VERIFICATION.md).
 
 ## Requisitos
 
-Minecraft 1.21.11, Fabric Loader 0.20.1 o superior, Fabric API y Java 21.
+Minecraft 26.2, Fabric Loader 0.20.1 o superior, Fabric API 0.161.0+26.2 y
+Java 25.

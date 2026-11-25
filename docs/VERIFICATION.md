@@ -5,7 +5,7 @@ pruebas manuales en el juego. Esta página indica qué cubre cada una.
 
 ## Tests automáticos
 
-`./gradlew test` ejecuta 77 tests en 11 clases (`src/test/java/dev/effecttimer`).
+`./gradlew test` ejecuta 81 tests en 12 clases (`src/test/java/dev/effecttimer`).
 El workflow [CI](../.github/workflows/ci.yml) los ejecuta en cada pull request
 hacia `main`, y el workflow de release los ejecuta antes de publicar el jar.
 
@@ -22,15 +22,43 @@ hacia `main`, y el workflow de release los ejecuta antes de publicar el jar.
 | `ConfigMigrationV3Test` | 4 | Cadena v1 → v2 → v3 y guardado con copia de seguridad. |
 | `IconPixelArtTest` | 4 | Icono de 128×128 con bloques uniformes y documentación de la vista previa. |
 | `PotionEffectRenameTest` | 4 | Nombre visible «Potion Effect» en metadatos, idiomas, README y jar. |
+| `ModInstallationTest` | 4 | Fabric Loader instala el mod: id, nombre, entorno, versión expandida, entrypoint cliente e icono. |
 
 Los tests de la capa de cliente (pantallas, HUD, render) no pueden ejecutarse
 sin Minecraft; se cubren solo con la lógica pura que usan (formato, config,
 layout, colores).
 
+## Arranque con Fabric Loader
+
+Los tests se ejecutan dentro de una JVM con Fabric Loader arrancado
+(`fabric-loader-junit`), en modo de desarrollo. Al arrancar, el loader lee el
+`fabric.mod.json` del mod y lo instala: si el manifiesto, las dependencias
+declaradas o el icono estuvieran mal, la suite no llegaría a ejecutarse. La
+instalación del mod queda así comprobada en cada ejecución de la CI.
+
+El minion de PIT no arranca el loader: PIT abre una sesión de JUnit por
+clase de test y el listener del loader solo puede arrancar una vez por JVM
+(`Duplicate setLauncher call!`). Por eso `fabric-loader-junit` se excluye del
+classpath de PIT; los tests de este mod son de lógica pura y no lo necesitan.
+
+## Tests de mutación
+
+`./gradlew pitest -I tools/mutation/pitest.init.gradle` ejecuta PIT sobre la
+lógica pura (`dev.effecttimer.config`, `.format` y `.layout`, 39 clases) con
+los grupos de tests como oráculo (el test de instalación queda fuera: necesita
+el loader, que no está en el classpath de PIT). El informe queda en
+`build/reports/pitest/mutations.xml` y el resumen por paquete se publica como
+anotación en la CI.
+
+El objetivo no es una puntuación alta sino comprobar que los tests detectan
+los errores que dicen detectar: las mutaciones que sobreviven son puntos
+donde la cobertura de los tests es floja y sirven de lista de trabajo. La
+puntuación actual es del 42,9 % sobre 924 mutaciones (396 detectadas).
+
 ## Pruebas manuales en el juego
 
 No verificado en esta revisión: las comprobaciones siguientes requieren lanzar
-Minecraft 1.21.11 con Fabric.
+Minecraft 26.2 con Fabric.
 
 - Teclas O, H y la tercera tecla sin asignar.
 - Render de los estilos `MINECRAFT_COMPACT`, `CLEAN_CARD`, `MINIMAL_TEXT` y

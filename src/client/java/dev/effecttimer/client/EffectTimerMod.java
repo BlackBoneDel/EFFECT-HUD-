@@ -12,7 +12,7 @@ import dev.effecttimer.config.HudConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
@@ -64,7 +64,7 @@ public final class EffectTimerMod implements ClientModInitializer {
 	public void onInitializeClient() {
 		getConfigManager();
 
-		ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloader(
+		ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloadListener(
 				Identifier.fromNamespaceAndPath(MOD_ID, "i18n_reloader"),
 				(ResourceManagerReloadListener) ModI18n::reloadFromResources
 		);
@@ -79,21 +79,21 @@ public final class EffectTimerMod implements ClientModInitializer {
 				Identifier.fromNamespaceAndPath(MOD_ID, "general")
 		);
 
-		openConfigKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+		openConfigKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
 				"key.effecttimer.open_config",
 				InputConstants.Type.KEYSYM,
 				GLFW.GLFW_KEY_O,
 				keyCategory
 		));
 
-		openEditorKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+		openEditorKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
 				"key.effecttimer.open_editor",
 				InputConstants.Type.KEYSYM,
 				GLFW.GLFW_KEY_H,
 				keyCategory
 		));
 
-		toggleEffectsKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+		toggleEffectsKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
 				"key.effecttimer.toggle_effects",
 				InputConstants.Type.KEYSYM,
 				InputConstants.UNKNOWN.getValue(),
@@ -106,46 +106,45 @@ public final class EffectTimerMod implements ClientModInitializer {
 		// (vanillaEffectsMode = HIDE_VANILLA). No se usan mixins: la API oficial
 		// HudElementRegistry.replaceElement ya permite envolver el elemento.
 		HudElementRegistry.replaceElement(
-				VanillaHudElements.STATUS_EFFECTS,
-				vanilla -> (graphics, tickCounter) -> {
+				VanillaHudElements.MOB_EFFECTS,
+				vanilla -> (graphics, deltaTracker) -> {
 					if (VisibilityRules.shouldRenderVanillaEffects(getConfig())) {
-						vanilla.render(graphics, tickCounter);
+						vanilla.extractRenderState(graphics, deltaTracker);
 					}
 				}
 		);
 
 		HudElementRegistry.attachElementAfter(
-				VanillaHudElements.STATUS_EFFECTS,
+				VanillaHudElements.MOB_EFFECTS,
 				Identifier.fromNamespaceAndPath(MOD_ID, "effects_hud"),
 				EffectsHudRenderer::renderLive
 		);
 	}
 
 	private void onEndClientTick(Minecraft client) {
-		if (!(client.screen instanceof HudEditorScreen editor && editor.isInteracting())) {
+		if (!(client.gui.screen() instanceof HudEditorScreen editor && editor.isInteracting())) {
 			getConfigManager().tickAutoSave();
 		}
 
 		if (client.player != null && getConfigManager().consumeRecoveryNotice()) {
-			client.player.displayClientMessage(
-					ModI18n.text("effecttimer.message.config_recovered"),
-					false
-			);
+			client.player.sendSystemMessage(
+					ModI18n.text("effecttimer.message.config_recovered")
+				);
 		}
 
 		// Nunca procesar los hotkeys del mod con una GUI/pantalla de texto abierta.
-		if (client.screen != null) {
+		if (client.gui.screen() != null) {
 			drainClicks();
 			return;
 		}
 
 		while (openConfigKey.consumeClick()) {
-			client.setScreen(new MainConfigScreen(null));
+			client.gui.setScreen(new MainConfigScreen(null));
 			return;
 		}
 
 		while (openEditorKey.consumeClick()) {
-			client.setScreen(new HudEditorScreen(null, getConfig().copy(), null));
+			client.gui.setScreen(new HudEditorScreen(null, getConfig().copy(), null));
 			return;
 		}
 
@@ -155,12 +154,11 @@ public final class EffectTimerMod implements ClientModInitializer {
 			getConfigManager().markDirty();
 			getConfigManager().saveNow();
 			if (client.player != null) {
-				client.player.displayClientMessage(
+				client.player.sendOverlayMessage(
 						ModI18n.text(cfg.effects.enabled
 								? "effecttimer.message.effects_enabled"
-								: "effecttimer.message.effects_disabled"),
-						true
-				);
+								: "effecttimer.message.effects_disabled")
+					);
 			}
 		}
 	}

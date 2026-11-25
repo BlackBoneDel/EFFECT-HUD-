@@ -6,7 +6,7 @@ su tono (`dev.effecttimer.format.EffectsColorResolver.vividize`) para que sea
 legible sobre fondo oscuro. Los casi-grises se aclaran sin inventar tono.
 
 Las columnas «antes» son la paleta pública de los efectos vanilla (constantes de
-`MobEffect`). No se ha comprobado en el juego que coincidan con 1.21.11; el
+`MobEffect`). No se ha comprobado en el juego que coincidan con 26.2; el
 «después» es la aplicación de la regla sobre ese valor.
 
 ## Efectos vanilla (antes -> después)
