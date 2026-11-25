@@ -111,6 +111,7 @@ jobs:
       contents: read
       checks: write
     env:
+      GITHUB_TOKEN: ${{ github.token }}
       PROBE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       PROBE_DETAILS_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
