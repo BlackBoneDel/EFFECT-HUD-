@@ -92,6 +92,17 @@ allprojects { Project p ->
             if (clientClasses != null) {
                 t.dependsOn(clientClasses)
             }
+
+            // fabric-loader-junit only ships a JUnit Platform session listener
+            // that starts Fabric Loader. PIT opens a new session for every test
+            // class, so the loader would be started again and again and the
+            // second start fails with "Duplicate setLauncher call!". The tests
+            // of this mod are pure logic and do not need the loader, so the
+            // jar is left out of the classpath PIT analyses.
+            t.additionalClasspath.setFrom(testSet.runtimeClasspath.filter { f ->
+                !f.name.startsWith('fabric-loader-junit')
+            })
+            t.additionalClasspath.from(clientSet.output.classesDirs)
         }
 
         println("[pitest] PIT ${ext.pitestVersion.get()} | main source sets: " +
