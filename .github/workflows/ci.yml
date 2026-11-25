@@ -15,18 +15,18 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v5
 
-      - name: Set up JDK 21 (Temurin)
+      - name: Set up JDK 25 (Temurin)
         uses: actions/setup-java@v5
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'temurin'
           cache: 'gradle'
 
       - name: Grant execute permission to gradlew
         run: chmod +x ./gradlew
 
-      - name: Run tests and build the remapped mod jar
-        run: ./gradlew test remapJar --no-daemon
+      - name: Run tests and build the mod jar
+        run: ./gradlew test jar --no-daemon
 
       - name: Count executed tests
         if: always()
@@ -70,10 +70,10 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v5
 
-      - name: Set up JDK 21 (Temurin)
+      - name: Set up JDK 25 (Temurin)
         uses: actions/setup-java@v5
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'temurin'
           cache: 'gradle'
 
