@@ -106,7 +106,6 @@ jobs:
           code=$?
           set -e
           python3 - <<'PY'
-          import re
           text = open('pit.log', encoding='utf-8', errors='replace').read()
           idx = text.find('What went wrong')
           snippet = text[idx:idx + 1500] if idx >= 0 else text[-1500:]
