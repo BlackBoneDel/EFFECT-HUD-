@@ -26,7 +26,46 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run tests and build the mod jar
-        run: ./gradlew test jar --no-daemon
+        run: |
+          set +e
+          ./gradlew --no-daemon --console=plain test jar > /tmp/gradle.log 2>&1
+          code=$?
+          set -e
+          python3 - <<'PY'
+          import os
+          import re
+          text = open('/tmp/gradle.log', encoding='utf-8', errors='replace').read()
+          errors = []
+          current = None
+          for line in text.splitlines():
+              m = re.match(r'^(.+\.java):(\d+): error: (.*)$', line.strip())
+              if m:
+                  if current:
+                      errors.append(current)
+                  current = ['%s:%s: error: %s' % (m.group(1), m.group(2), m.group(3))]
+              elif current is not None and re.match(r'^\s+(symbol|location):', line):
+                  current.append(line.strip())
+              elif current is not None and line.strip() and not line.startswith(('\t', ' ')):
+                  errors.append(current)
+                  current = None
+          if current:
+              errors.append(current)
+          if not errors:
+              errors = [[l.strip()] for l in text.splitlines() if 'error:' in l.lower()][:50]
+          summary = os.environ.get('GITHUB_STEP_SUMMARY')
+          if summary:
+              with open(summary, 'a', encoding='utf-8') as fh:
+                  fh.write('## Compiler diagnostics\n\n```\n')
+                  for e in errors:
+                      fh.write(' | '.join(e) + '\n')
+                  fh.write('```\n')
+          for i in range(0, min(len(errors), 100), 10):
+              chunk = errors[i:i + 10]
+              body = '%0A'.join(' | '.join(e).replace('%', '%25') for e in chunk)
+              print('::error title=Compile error::' + body)
+          print('::notice title=Compile errors::%d compiler error(s) detected' % len(errors))
+          PY
+          exit $code
 
       - name: Count executed tests
         if: always()
