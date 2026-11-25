@@ -57,7 +57,7 @@ public final class ModInstallationTest {
 		// Minecraft, que aquí no está arrancada.
 		Class<?> entrypoint = Class.forName(CLIENT_ENTRYPOINT, false, getClass().getClassLoader());
 		assertEquals(CLIENT_ENTRYPOINT, entrypoint.getName());
-		assertEquals("dev.effecttimer", entrypoint.getPackageName());
+		assertEquals("dev.effecttimer.client", entrypoint.getPackageName());
 		assertTrue(ClientModInitializer.class.isAssignableFrom(entrypoint),
 				"el entrypoint cliente no implementa ClientModInitializer");
 	}

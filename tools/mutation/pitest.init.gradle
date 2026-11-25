@@ -100,8 +100,9 @@ allprojects { Project p ->
             // that starts Fabric Loader. PIT opens a new session for every test
             // class, so the loader would be started again and again and the
             // second start fails with "Duplicate setLauncher call!". The tests
-            // of this mod are pure logic and do not need the loader, so the
-            // jar is left out of the classpath PIT analyses.
+            // that PIT uses as oracle are pure logic and do not need the
+            // loader, so the jar is left out of the classpath PIT analyses
+            // (the installation test is excluded above).
             t.additionalClasspath.setFrom(testSet.runtimeClasspath.filter { f ->
                 !f.name.startsWith('fabric-loader-junit')
             })
