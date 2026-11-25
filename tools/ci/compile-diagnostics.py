@@ -27,8 +27,15 @@ ANY_ERROR_RE = re.compile(r"error:", re.IGNORECASE)
 SUMMARY_HEADER = "## Compiler diagnostics"
 
 
-def collect(text: str) -> list[list[str]]:
+def collect(text: str) -> tuple[list[list[str]], list[str]]:
+    """Splits the log into real compiler errors and other error-looking lines.
+
+    javac reports errors as ``path:line: error: message``; anything else that
+    merely mentions "error" (a Gradle message, a stack trace, ...) is kept
+    apart, so a green build does not report phantom compiler errors.
+    """
     errors: list[list[str]] = []
+    others: list[str] = []
     current: list[str] | None = None
     for raw in text.splitlines():
         line = raw.rstrip()
@@ -46,10 +53,10 @@ def collect(text: str) -> list[list[str]]:
             errors.append(current)
             current = None
         if current is None and ANY_ERROR_RE.search(stripped) and len(stripped) < 400:
-            errors.append([stripped])
+            others.append(stripped)
     if current:
         errors.append(current)
-    return errors
+    return errors, others
 
 
 def write_summary(errors: list[list[str]]) -> None:
@@ -63,12 +70,15 @@ def write_summary(errors: list[list[str]]) -> None:
         handle.write("```\n")
 
 
-def annotate(errors: list[list[str]]) -> None:
+def annotate(errors: list[list[str]], compiler_errors: int) -> None:
     for index in range(0, min(len(errors), 100), 10):
         chunk = errors[index:index + 10]
         body = "%0A".join(" | ".join(entry).replace("%", "%25") for entry in chunk)
         print(f"::error title=Compile error::{body}")
-    print(f"::notice title=Compile errors::{len(errors)} compiler error(s) detected")
+    if compiler_errors:
+        print(f"::notice title=Compile errors::{compiler_errors} compiler error(s) detected")
+    else:
+        print("::notice title=Compile errors::no compiler error in the log")
 
 
 def publish(text: str) -> None:
@@ -131,14 +141,18 @@ def publish(text: str) -> None:
 def main(argv: list[str]) -> int:
     path = Path(argv[1]) if len(argv) > 1 else Path("/tmp/gradle.log")
     text = path.read_text(encoding="utf-8", errors="replace") if path.exists() else ""
-    errors = collect(text)
+    errors, others = collect(text)
     publish(text)
-    if not errors:
-        # Fall back to the tail of the log so the failure is never silent.
+    compiler_errors = len(errors)
+    if not errors and not others:
+        # Nothing looks like an error: show the tail of the log anyway, so a
+        # failure is never silent.
         tail = text[-3000:] if text else "(no gradle log)"
         errors = [[line] for line in tail.splitlines() if line.strip()][-20:]
+    else:
+        errors = errors + [[line] for line in others[:20]]
     write_summary(errors)
-    annotate(errors)
+    annotate(errors, compiler_errors)
     return 0
 
 
