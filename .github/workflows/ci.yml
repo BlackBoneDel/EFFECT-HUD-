@@ -62,6 +62,43 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
+  api-probe:
+    # Temporary probe for the 26.2 port: records hard evidence about the new
+    # API surface (resolved jars, import FQNs, javap) even when the build fails.
+    if: always()
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 25 (Temurin)
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x ./gradlew
+
+      - name: Resolve the 26.2 classpath
+        continue-on-error: true
+        run: ./gradlew --no-daemon --console=plain -I tools/ci/api-probe.init.gradle apiProbeClasspath
+
+      - name: Inspect the resolved jars
+        if: always()
+        continue-on-error: true
+        run: python3 tools/ci/api-probe.py
+
+      - name: Upload the API probe report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-probe
+          path: build/api-probe/api-probe.txt
+          if-no-files-found: warn
+
   mutation:
     if: github.event_name == 'workflow_dispatch'
     continue-on-error: true

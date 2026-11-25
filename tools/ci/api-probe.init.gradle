@@ -1,0 +1,40 @@
+// Temporary init script used only by the CI "api-probe" job.
+//
+// It resolves the Minecraft / Fabric API classpath and writes the resolved jar
+// paths to build/api-probe/classpath.txt so that tools/ci/api-probe.py can
+// inspect the real 26.2 artifacts. A normal build never loads this file.
+
+gradle.projectsEvaluated {
+	rootProject.tasks.register("apiProbeClasspath") {
+		doLast {
+			def out = new File(rootProject.buildDir, "api-probe")
+			out.mkdirs()
+			def lines = []
+
+			[
+				"compileClasspath",
+				"runtimeClasspath",
+				"testCompileClasspath",
+				"clientCompileClasspath",
+				"clientRuntimeClasspath"
+			].each { name ->
+				def cfg = rootProject.configurations.findByName(name)
+				if (cfg == null) {
+					return
+				}
+
+				lines.add("== ${name} ==")
+				try {
+					cfg.incoming.artifacts.each { artifact ->
+						lines.add(artifact.file.absolutePath)
+					}
+				} catch (Exception e) {
+					lines.add("# could not resolve ${name}: ${e.message}")
+				}
+			}
+
+			new File(out, "classpath.txt").text = lines.join("\n") + "\n"
+			rootProject.logger.lifecycle("api-probe: classpath written to ${new File(out, 'classpath.txt')}")
+		}
+	}
+}
